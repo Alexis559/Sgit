@@ -10,11 +10,11 @@ object Blob {
    * @param filesAdd files to add in the current stage
    */
   def createBlob(filesAdd: List[String]): Unit = {
-    val repDirectory = IO.getRepositoryPath(IO.getCurrentPath())
+    val repDirectory = IO.getRepositoryPath()
     if(repDirectory == null)
       throw new Exception("This is not a Sgit repository. You should use 'sgit init'.")
 
-    val v = filesAdd.map(x => treatBlob(x, repDirectory))
+    filesAdd.foreach(x => treatBlob(x, repDirectory))
   }
 
   /**
@@ -27,8 +27,10 @@ object Blob {
     val shaContent = IO.sha(textContent)
     val dirName = shaContent.substring(0, 2)
     val fileName = shaContent.substring(3)
-    val pathObject = repDirectory + File.separator + "objects"
+    val pathObject = IO.getPathToObject
+    val pathIndex = IO.getPathToIndex
     IO.createDirectory(pathObject, dirName)
-    IO.createFile(pathObject + File.separator + dirName, fileName, textContent)
+    IO.createFile(IO.buildPath(List(pathObject, dirName)), fileName, textContent)
+    IO.writeInFile(pathIndex, shaContent + " " + IO.getPathFile(file) + "\n")
   }
 }

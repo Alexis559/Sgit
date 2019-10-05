@@ -2,16 +2,17 @@ package core.repository
 
 import java.io.File
 
+import utils.io.IO
+
 /**
  * NOT SURE ABOUT THIS CLASS
  * @param pathRepo path where is located the .sgit
  */
 
-
 class Repository(val pathRepo: String){
 
   val worktree: String = pathRepo
-  val sgitdir: String = pathRepo + File.separator + ".sgit"
+  val sgitdir: String = IO.buildPath(List(pathRepo, ".sgit"))
   val conf: String = ""
 
   def init(): Unit = {

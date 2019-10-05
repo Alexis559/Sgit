@@ -1,8 +1,9 @@
 package utils.io
 
-import java.io.{File, PrintWriter}
+import java.io.{File, FileWriter, PrintWriter}
 import java.math.BigInteger
 import java.security.MessageDigest
+
 import scala.annotation.tailrec
 import scala.io.Source
 
@@ -12,7 +13,7 @@ object IO {
    * Function to get the current path.
    * @return the path in String format
    */
-  def getCurrentPath(): String = {
+  def getCurrentPath: String = {
     System.getProperty("user.dir")
   }
 
@@ -24,7 +25,7 @@ object IO {
   def createDirectory(pathDir: String, dirName: String): Unit = {
     val file = new File(pathDir)
     if(file.exists() && file.isDirectory) {
-      val path = pathDir + File.separator + dirName
+      val path = buildPath(List(pathDir, dirName))
       val file = new File(path)
       file.mkdirs()
     }else{
@@ -41,7 +42,7 @@ object IO {
   def createFile(pathFile: String, fileName: String, contentToWrite: String): Unit = {
     val file = new File(pathFile)
     if(file.exists() && file.isDirectory) {
-      val path = pathFile + File.separator + fileName
+      val path = buildPath(List(pathFile, fileName))
       val pw = new PrintWriter(new File(path))
       pw.write(contentToWrite)
       pw.close()
@@ -75,8 +76,8 @@ object IO {
    * @return the path where is located the .sgit, else return null if not found
    */
   @tailrec
-  def getRepositoryPath(path: String): String = {
-    val file = new File(path + File.separator + ".sgit")
+  def getRepositoryPath(path: String = IO.getCurrentPath): String = {
+    val file = new File(buildPath(List(path, ".sgit")))
     if(file.exists()) {
       file.getAbsolutePath
     }else if(file.getParent == "null"){
@@ -100,5 +101,61 @@ object IO {
     }else{
       throw new Exception("File doesn't exist !")
     }
+  }
+
+  /**
+   * Function to write in a file.
+   * @param path path to the file where to write
+   * @param content to write in the file
+   */
+  def writeInFile(path: String, content: String): Unit = {
+    val file = new File(path)
+    if(file.exists() && file.isFile) {
+      val writer = new FileWriter(file, true)
+      writer.write(content)
+      writer.close()
+    }
+  }
+
+  /**
+   * Function to get the absolute path of a file.
+   * @param path path to the file
+   * @return the path in a String format
+   */
+  def getPathFile(path: String): String = {
+    val file = new File(path)
+    if(file.exists()) {
+      file.getAbsolutePath
+    }else{
+      throw new Exception("File doesn't exist !")
+    }
+  }
+
+  /**
+   * Function to build path.
+   * @param listPath list of directories to build the path
+   * @return the path in String format
+   */
+  def buildPath(listPath: List[String]): String = {
+    var path = ""
+    listPath.foreach(x => path = path + x + File.separator)
+    println(path)
+    path.substring(0, path.length-1)
+  }
+
+  /**
+   * Function to get the path to the object folder in .sgit
+   * @return the path in String format
+   */
+  def getPathToObject: String = {
+    buildPath(List(getRepositoryPath(), "objects"))
+  }
+
+  /**
+   * Function to get the path to the INDEX file in .sgit
+   * @return the path in String format
+   */
+  def getPathToIndex: String = {
+    buildPath(List(getRepositoryPath(), "INDEX"))
   }
 }
