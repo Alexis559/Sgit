@@ -1,6 +1,8 @@
+import utils.Parser._
+
 object Sgit extends App {
-  def   hello(): Unit = {
-    print("Hello")
+  getConfig(args) match {
+    case Some(config) => print(config)
+    case None =>
   }
-  hello()
 }
