@@ -1,7 +1,5 @@
 package utils.parser
 
-import java.io.File
-
 import scopt.OptionParser
 
 /**
@@ -15,6 +13,9 @@ object Parser {
       cmd("init")
         .action((_, c) => c.copy(mode = "init"))
         .text("Create a Sgit repository in the current directory.")
+      cmd("test")
+        .action((_, c) => c.copy(mode = "test"))
+        .text("test funct")
       cmd("status")
         .action((_, c) => c.copy(mode = "status"))
         .text("Show the working tree status.")
@@ -25,12 +26,13 @@ object Parser {
         .action((_, c) => c.copy(mode = "add"))
         .text("Add file contents to the index.")
         .children(
-          arg[File]("<file>...")
+          arg[String]("<file>...")
             .optional()
             .unbounded()
             .action((x, c) => c.copy(filesAdd = c.filesAdd :+ x))
             .text("List of files to add."),
           arg[String]("/regex/")
+            .optional()
             .action((x, c) => c.copy(regexAdd = x))
             .text("Regular expression to add files.")
         )

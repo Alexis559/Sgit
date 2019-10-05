@@ -1,7 +1,6 @@
-package core.init
+package core.commands
 
 import java.io.File
-
 import core.repository.Repository
 import utils.io.IO._
 
