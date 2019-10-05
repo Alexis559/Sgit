@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
     name := "Sgit",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-      "com.github.scopt" %% "scopt" % "4.0.0-RC2"
+      "com.github.scopt" %% "scopt" % "4.0.0-RC2",
     ),
     mainClass in Compile := Some("Sgit")
   )
@@ -16,4 +16,4 @@ import sbtassembly.AssemblyPlugin.defaultShellScript
 
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript))
 
-assemblyJarName in assembly := s"${name.value}-${version.value}"
+assemblyJarName in assembly := s"${name.value}-${version.value}.jar"

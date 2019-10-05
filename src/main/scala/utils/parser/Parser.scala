@@ -1,8 +1,12 @@
-package utils
+package utils.parser
 
 import java.io.File
+
 import scopt.OptionParser
 
+/**
+ * Parser of the arguments with Scopt
+ */
 object Parser {
   def getParser(): OptionParser[Config] = {
     new scopt.OptionParser[Config]("sgit") {
