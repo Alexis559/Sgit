@@ -16,7 +16,7 @@ object Init {
     if(IO.isEmpty(path)) {
       IO.createDirectory(path, ".sgit")
       val repository = new Repository(path)
-      val directories = listDir.map(x => IO.createDirectory(repository.sgitdir, x))
+      listDir.foreach(x => IO.createDirectory(repository.sgitdir, x))
       IO.createFile(repository.sgitdir, "description", "Unnamed repository, edit this file 'description' to name the repository.\n")
       IO.createFile(repository.sgitdir, "HEAD", "ref: refs/heads/master\n")
       IO.createFile(repository.sgitdir, "INDEX", "")

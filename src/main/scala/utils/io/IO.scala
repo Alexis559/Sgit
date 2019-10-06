@@ -1,10 +1,6 @@
 package utils.io
 
 import java.io.{File, FileWriter, PrintWriter}
-import java.math.BigInteger
-import java.security.MessageDigest
-
-import scala.annotation.tailrec
 import scala.io.Source
 
 object IO {
@@ -62,44 +58,18 @@ object IO {
   }
 
   /**
-   * Function to convert the content in sha-256
-   * @param content to convert in sha-256
-   * @return the sha-256 equivalent of the content
-   */
-  def sha(content: String): String = {
-    String.format("%032x", new BigInteger(1, MessageDigest.getInstance("SHA-256").digest(content.getBytes("UTF-8"))))
-  }
-
-  /**
-   * Function to find the .sgit in the repository.
-   * @param path current path
-   * @return the path where is located the .sgit, else return null if not found
-   */
-  @tailrec
-  def getRepositoryPath(path: String = IO.getCurrentPath): String = {
-    val file = new File(buildPath(List(path, ".sgit")))
-    if(file.exists()) {
-      file.getAbsolutePath
-    }else if(file.getParent == "null"){
-      null
-    }else {
-      getRepositoryPath(new File(path).getParent)
-    }
-  }
-
-  /**
    * Function to read the content of a file.
    * @param pathFile path to the file to read
-   * @return the content of the file in String format
+   * @return Either left: error message, Either right: the content of the file in String format
    */
-  def readContentFile(pathFile: String): String = {
+  def readContentFile(pathFile: String): Either[String, String] = {
     if(new File(pathFile).exists()) {
       val bufferedSource = Source.fromFile(pathFile)
       val textContent = bufferedSource.getLines().mkString
       bufferedSource.close
-      textContent
+      Right(textContent)
     }else{
-      throw new Exception("File doesn't exist !")
+      Left("File doesn't exist !")
     }
   }
 
@@ -120,14 +90,14 @@ object IO {
   /**
    * Function to get the absolute path of a file.
    * @param path path to the file
-   * @return the path in a String format
+   * @return Either left: error message, Either right: the path in String format to the file
    */
-  def getPathFile(path: String): String = {
+  def getPathFile(path: String): Either[String, String] = {
     val file = new File(path)
     if(file.exists()) {
-      file.getAbsolutePath
+      Right(file.getAbsolutePath)
     }else{
-      throw new Exception("File doesn't exist !")
+      Left("File doesn't exist !")
     }
   }
 
@@ -139,23 +109,6 @@ object IO {
   def buildPath(listPath: List[String]): String = {
     var path = ""
     listPath.foreach(x => path = path + x + File.separator)
-    println(path)
     path.substring(0, path.length-1)
-  }
-
-  /**
-   * Function to get the path to the object folder in .sgit
-   * @return the path in String format
-   */
-  def getPathToObject: String = {
-    buildPath(List(getRepositoryPath(), "objects"))
-  }
-
-  /**
-   * Function to get the path to the INDEX file in .sgit
-   * @return the path in String format
-   */
-  def getPathToIndex: String = {
-    buildPath(List(getRepositoryPath(), "INDEX"))
   }
 }

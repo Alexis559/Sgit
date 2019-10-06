@@ -1,20 +1,20 @@
 package core.objects
 
-import java.io.File
+import utils.io.{IO, SgitIO}
 
-import utils.io.IO
+object Object{
 
-class Object(val sha: String){
-
-  val shaObject: String = sha
-  val objectPath: String = getObjectPath(shaObject)
-  val objectFilePath: String = getObjectFilePath(shaObject)
-
-  def getObjectPath(sha : String): String = {
-    IO.buildPath(List(IO.getPathToObject, sha.substring(0,2)))
+  def getObjectPath(shaObject : String): Either[String, String] = {
+    SgitIO.getPathToObject match {
+      case Left(error) => Left(error)
+      case Right(result) => Right(IO.buildPath(List(result, shaObject.substring(0,2))))
+    }
   }
 
-  def getObjectFilePath(shaObject: String): String = {
-    IO.buildPath(List(getObjectPath(shaObject), shaObject.substring(3)))
+  def getObjectFilePath(shaObject: String): Either[String, String] = {
+    getObjectPath(shaObject) match {
+      case Left(error) => Left(error)
+      case Right(result) => Right(IO.buildPath(List(result, shaObject.substring(3))))
+    }
   }
 }

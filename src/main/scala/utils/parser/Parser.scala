@@ -13,9 +13,6 @@ object Parser {
       cmd("init")
         .action((_, c) => c.copy(mode = "init"))
         .text("Create a Sgit repository in the current directory.")
-      cmd("test")
-        .action((_, c) => c.copy(mode = "test"))
-        .text("test funct")
       cmd("status")
         .action((_, c) => c.copy(mode = "status"))
         .text("Show the working tree status.")
@@ -36,6 +33,9 @@ object Parser {
             .action((x, c) => c.copy(regexAdd = x))
             .text("Regular expression to add files.")
         )
+      cmd("commit")
+        .action((_, c) => c.copy(mode = "commit"))
+        .text("Record changes to the repository.")
       cmd("log")
         .action((_, c) => c.copy(mode = "log"))
         .text("Show commit logs.")
@@ -110,6 +110,17 @@ object Parser {
                 .text("Branch name or commit hash.")
             )
         )
+
+
+      /**
+       * TODO
+       * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! A SUPPRIMER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       */
+      cmd("test")
+        .action((_, c) => c.copy(mode = "test"))
+        .text("test funct")
+
+
     }
   }
 
