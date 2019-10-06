@@ -113,9 +113,9 @@ object Parser {
 
 
       /**
-       * TODO
        * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! A SUPPRIMER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
        */
+      // TODO DELETE THIS AT THE END
       cmd("test")
         .action((_, c) => c.copy(mode = "test"))
         .text("test funct")

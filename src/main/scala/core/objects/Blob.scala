@@ -29,11 +29,12 @@ object Blob {
   }
 
   /**
-   * TODO move this function to OBJECT
+   *
    * @param repoDir
    * @param sha
    * @param textContent
    */
+    // TODO move this function to OBJECT
   def createBlob(repoDir: String, sha: String, textContent: String): Unit = {
     println(sha)
     val dirName = sha.substring(0, 2)
