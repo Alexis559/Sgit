@@ -5,7 +5,7 @@ import java.io.File
 import utils.io.IO
 
 /**
- * NOT SURE ABOUT THIS CLASS
+ * NOT SURE ABOUT THIS CLASS [DEPRECATED] WILL BE DELETED
  * @param pathRepo path where is located the .sgit
  */
 

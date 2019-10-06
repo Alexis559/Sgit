@@ -13,15 +13,11 @@ object Init {
    * @param path where we want to create the new repository
    */
   def createRepository(path : String): Unit = {
-    if(IO.isEmpty(path)) {
-      IO.createDirectory(path, ".sgit")
-      val repository = new Repository(path)
-      listDir.foreach(x => IO.createDirectory(repository.sgitdir, x))
-      IO.createFile(repository.sgitdir, "description", "Unnamed repository, edit this file 'description' to name the repository.\n")
-      IO.createFile(repository.sgitdir, "HEAD", "ref: refs/heads/master\n")
-      IO.createFile(repository.sgitdir, "INDEX", "")
-    }
-    else
-      print("Directory '" + path + "' is not empty !")
+    val repoPath = IO.buildPath(List(path, ".sgit"))
+    IO.createDirectory(path,".sgit")
+    listDir.foreach(x => IO.createDirectory(repoPath, x))
+    IO.createFile(repoPath, "description", "Unnamed repository, edit this file 'description' to name the repository.\n")
+    IO.createFile(repoPath, "HEAD", "ref: refs/heads/master\n")
+    IO.createFile(repoPath, "index", "")
   }
 }

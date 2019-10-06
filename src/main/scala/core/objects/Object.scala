@@ -3,7 +3,6 @@ package core.objects
 import utils.io.{IO, SgitIO}
 
 object Object{
-
   def getObjectPath(shaObject : String): Either[String, String] = {
     SgitIO.getPathToObject match {
       case Left(error) => Left(error)

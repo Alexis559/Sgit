@@ -11,7 +11,7 @@ object Add {
   def add(filesAdd: List[String]): Unit = {
     SgitIO.getRepositoryPath() match {
       case Left(error) => print(error)
-      case Right(result) => filesAdd.foreach(x => treatBlob(x, result))
+      case Right(result) => filesAdd.foreach(x => treatBlob(x))
     }
   }
 }

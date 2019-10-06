@@ -1,5 +1,5 @@
 package core.commands
 
-object Commit {
+object CommitCmd {
 
 }

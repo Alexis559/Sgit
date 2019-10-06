@@ -11,12 +11,12 @@ import scala.annotation.tailrec
 object SgitIO {
 
   /**
-   * Function to convert the content in sha-256
-   * @param content to convert in sha-256
-   * @return the sha-256 equivalent of the content
+   * Function to get the SHA-1 hash of the content of a file
+   * @param content to hash
+   * @return the SHA-1 hash
    */
   def sha(content: String): String = {
-    String.format("%032x", new BigInteger(1, MessageDigest.getInstance("SHA-256").digest(content.getBytes("UTF-8"))))
+    String.format("%032x", new BigInteger(1, MessageDigest.getInstance("SHA-1").digest(content.getBytes("UTF-8"))))
   }
 
   /**
@@ -59,7 +59,7 @@ object SgitIO {
   def getPathToIndex: Either[String, String] = {
     getRepositoryPath() match {
       case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "INDEX")))
+      case Right(result) => Right(buildPath(List(result, "index")))
     }
   }
 

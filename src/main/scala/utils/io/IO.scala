@@ -62,10 +62,10 @@ object IO {
    * @param pathFile path to the file to read
    * @return Either left: error message, Either right: the content of the file in String format
    */
-  def readContentFile(pathFile: String): Either[String, String] = {
+  def readContentFile(pathFile: String): Either[String, List[String]] = {
     if(new File(pathFile).exists()) {
       val bufferedSource = Source.fromFile(pathFile)
-      val textContent = bufferedSource.getLines().mkString
+      val textContent = bufferedSource.getLines().toList
       bufferedSource.close
       Right(textContent)
     }else{
@@ -88,14 +88,14 @@ object IO {
   }
 
   /**
-   * Function to get the absolute path of a file.
+   * Function to get the path of a file.
    * @param path path to the file
    * @return Either left: error message, Either right: the path in String format to the file
    */
   def getPathFile(path: String): Either[String, String] = {
     val file = new File(path)
     if(file.exists()) {
-      Right(file.getAbsolutePath)
+      Right(file.getPath)
     }else{
       Left("File doesn't exist !")
     }
@@ -110,5 +110,16 @@ object IO {
     var path = ""
     listPath.foreach(x => path = path + x + File.separator)
     path.substring(0, path.length-1)
+  }
+
+  /**
+   * Function to concatenate a List of String
+   * @param list the List of String
+   * @return the String
+   */
+  def listToString(list: List[String]): String = {
+    val string: StringBuilder = new StringBuilder()
+    list.foreach(x => string.append(x))
+    string.toString()
   }
 }
