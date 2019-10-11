@@ -1,45 +1,36 @@
 package core.objects
 
+import core.repository.Repository
 import utils.io.{IO, SgitIO}
 
 object Blob {
 
   /**
    * Function to get SHA-1 checksum for the files to create the folders and the files.
-   * @param file path to the file
+   *
+   * @param file path to the file we want to add
    */
   def treatBlob(file: String): Unit = {
+    // We read the content of the file
     val textContent = IO.readContentFile(file)
     if(textContent.isRight) {
       val fileContent = textContent.right.get
+      // We hash the content
       val shaContent = SgitIO.sha(IO.listToString(fileContent))
-
-      SgitIO.getPathToObject match {
+      // We get the path to the objects folder in .sgit
+      Object.createObject(shaContent, IO.listToString(fileContent)) match {
         case Left(error) => print(error)
-        case Right(result) => createBlob(result, shaContent, IO.listToString(fileContent))
-      }
-
-      SgitIO.getPathToIndex match {
-        case Left(error) => print(error)
-        case Right(result) => IO.writeInFile(result, shaContent + " " + IO.getPathFile(file).right.get + "\n")
+        case Right(result) => {
+          // We get the path to the index file
+          Repository.getPathToIndex match {
+            case Left(error) => print(error)
+            // We create the blobs
+            case Right(result) => IO.writeInFile(result, shaContent + " " + IO.getPathFile(file).right.get + "\n", true)
+          }
+        }
       }
     }else{
       print(textContent.left.get)
     }
-  }
-
-  /**
-   *
-   * @param repoDir
-   * @param sha
-   * @param textContent
-   */
-    // TODO move this function to OBJECT
-  def createBlob(repoDir: String, sha: String, textContent: String): Unit = {
-    println(sha)
-    val dirName = sha.substring(0, 2)
-    val fileName = sha.substring(2)
-    IO.createDirectory(repoDir, dirName)
-    IO.createFile(IO.buildPath(List(repoDir, dirName)), fileName, textContent)
   }
 }

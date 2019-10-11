@@ -1,17 +1,15 @@
 package utils.io
 
-import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
-
-import utils.io.IO._
 
 import scala.annotation.tailrec
 
 object SgitIO {
 
   /**
-   * Function to get the SHA-1 hash of the content of a file
+   * Function to get the SHA-1 hash of the content of a file.
+   *
    * @param content to hash
    * @return the SHA-1 hash
    */
@@ -20,57 +18,66 @@ object SgitIO {
   }
 
   /**
-   * Function to find the .sgit in the repository.
-   * @param path current path
-   * @return Either left: error message, Either right: the path in String format to the .sgit
+   * Function to convert a List of String into Map.
+   *
+   * @param list the List of String
+   * @return the Map construct from the List
+   */
+  def listToMap(list: List[String]): Map[String, Any] = {
+    val head = list.head // sha
+    val newList = list.drop(1) // drop the sha
+    val lastMap = Map(head -> Map.empty) // create a map with 'file name -> sha'
+
+    listToMapRec(newList, lastMap)
+  }
+
+  /**
+   * Recursive function to convert a List of String into Map.
+   *
+   * @param list the List of String
+   * @param map  the Map that we will return
+   * @return the Map construct from the List
    */
   @tailrec
-  def getRepositoryPath(path: String = IO.getCurrentPath): Either[String, String] = {
-    val file = new File(buildPath(List(path, ".sgit")))
-    val index = new File(buildPath(List(file.getAbsolutePath, "INDEX")))
-    val head = new File(buildPath(List(file.getAbsolutePath, "HEAD")))
-    val objects = new File(buildPath(List(file.getAbsolutePath, "objects")))
-    val refs = new File(buildPath(List(file.getAbsolutePath, "refs")))
-
-    if(file.exists() && index.exists() && head.exists() && objects.exists() && refs.exists()) {
-      Right(file.getAbsolutePath)
-    }else if(file.getParent == "null"){
-      Left("This is not a Sgit repository. You should use 'sgit init'.")
-    }else {
-      getRepositoryPath(new File(path).getParent)
+  def listToMapRec(list: List[String], map: Map[String, Any]): Map[String, Any] = {
+    if (list.isEmpty)
+      map
+    else {
+      val newList: List[String] = list.drop(1)
+      listToMapRec(newList, Map(list.head -> map))
     }
   }
 
   /**
-   * Function to get the path to the object folder in .sgit
-   * @return Either left: error message, Either right: the path in String format to the objects folder
+   * Recursive function to merge a list of Maps.
+   *
+   * @param listMap the list of Maps
+   * @return a Map which is the result of the merge of the others
    */
-  def getPathToObject: Either[String, String] = {
-    getRepositoryPath() match {
-      case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "objects")))
+  @tailrec
+  def mergeMaps(listMap: List[Map[String, Any]]): Map[String, Any] = {
+    if (listMap.size == 1) {
+      listMap(0)
+    } else {
+      val map = mergeMap(listMap.head, listMap.tail.head)
+      val list = listMap.drop(2)
+      mergeMaps(list.appended(map))
     }
   }
 
   /**
-   * Function to get the path to the INDEX file in .sgit
-   * @return Either left: error message, Either right: the path in String format to the INDEX file
+   * Function to merge two maps.
+   *
+   * @param map1 the first map
+   * @param map2 the second map
+   * @return the merge between the two maps
    */
-  def getPathToIndex: Either[String, String] = {
-    getRepositoryPath() match {
-      case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "index")))
-    }
+  def mergeMap(map1: Map[String, Any], map2: Map[String, Any]): Map[String, Map[String, Any]] = {
+    val keySet = map1.keySet ++ map2.keySet
+
+    def nodeForKey(parent: Map[String, Any], key: String): Map[String, Any] = parent.getOrElse(key, Map.empty).asInstanceOf[Map[String, Any]]
+
+    keySet.map(key => (key -> mergeMap(nodeForKey(map1, key), nodeForKey(map2, key)))).toMap
   }
 
-  /**
-   * Function to get the path to the HEAD file in .sgit
-   * @return Either left: error message, Either right: the path in String format to the HEAD file
-   */
-  def getPathToHead: Either[String, String] = {
-    getRepositoryPath() match {
-      case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "HEAD")))
-    }
-  }
 }

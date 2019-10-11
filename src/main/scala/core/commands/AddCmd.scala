@@ -1,17 +1,18 @@
 package core.commands
 
-import core.objects.Blob.treatBlob
-import utils.io.SgitIO
+import core.objects.Blob
+import core.repository.Repository
 
-object Add {
+object AddCmd {
   /**
    * Function to create the blobs in the object folder.
+   *
    * @param filesAdd files to add in the current stage
    */
   def add(filesAdd: List[String]): Unit = {
-    SgitIO.getRepositoryPath() match {
+    Repository.getRepositoryPath() match {
       case Left(error) => print(error)
-      case Right(result) => filesAdd.foreach(x => treatBlob(x))
+      case Right(result) => filesAdd.foreach(x => Blob.treatBlob(x))
     }
   }
 }

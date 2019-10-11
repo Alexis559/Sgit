@@ -36,6 +36,12 @@ object Parser {
       cmd("commit")
         .action((_, c) => c.copy(mode = "commit"))
         .text("Record changes to the repository.")
+        .children(
+          opt[String]('m', "message")
+            .required()
+            .action((x, c) => c.copy(commitName = x))
+            .text("Give message to commit."),
+        )
       cmd("log")
         .action((_, c) => c.copy(mode = "log"))
         .text("Show commit logs.")

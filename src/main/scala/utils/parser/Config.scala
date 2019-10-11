@@ -11,5 +11,6 @@ case class Config(
                    verboseBranch: Boolean = false, // -v flag used for branch command ?
                    branchName: String = "", // Branch name
                    tagName: String = "", // Tag name
+                   commitName: String = "", // Commit name
                    interactive: Boolean = false, // -i flag used for rebase command ?
                  )
