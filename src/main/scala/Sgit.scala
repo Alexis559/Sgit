@@ -6,7 +6,7 @@ import utils.parser.Parser._
 object Sgit extends App {
   getConfig(args) match {
     case Some(config) => config.mode match {
-      case "init" => InitCmd.createRepository(IO.getCurrentPath)
+      case "init" => InitCmd.init(IO.getCurrentPath)
       case "add" => AddCmd.add(config.filesAdd)
       case "commit" => Commit.commit(config.commitName)
       case "test" => Commit.commit("test") // TODO DELETE THIS AT THE END

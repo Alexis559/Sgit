@@ -12,25 +12,24 @@ object Blob {
    */
   def treatBlob(file: String): Unit = {
     // We read the content of the file
-    val textContent = IO.readContentFile(file)
-    if(textContent.isRight) {
-      val fileContent = textContent.right.get
-      // We hash the content
-      val shaContent = SgitIO.sha(IO.listToString(fileContent))
-      // We get the path to the objects folder in .sgit
-      Object.createObject(shaContent, IO.listToString(fileContent)) match {
-        case Left(error) => print(error)
-        case Right(result) => {
-          // We get the path to the index file
-          Repository.getPathToIndex match {
-            case Left(error) => print(error)
-            // We create the blobs
-            case Right(result) => IO.writeInFile(result, shaContent + " " + IO.getPathFile(file).right.get + "\n", true)
+    IO.readContentFile(file) match {
+      case Left(error) => println(error)
+      case Right(result) => {
+        // We hash the content
+        val shaContent = SgitIO.sha(IO.listToString(result))
+        // We get the path to the objects folder in .sgit
+        Object.createObject(shaContent, IO.listToString(result)) match {
+          case Left(error) => print(error)
+          case Right(result) => {
+            // We get the path to the index file
+            Repository.getPathToIndex match {
+              case Left(error) => print(error)
+              // We create the blobs
+              case Right(result) => IO.writeInFile(result, shaContent + " " + IO.cleanPathFile(file).getOrElse("") + "\n", true)
+            }
           }
         }
       }
-    }else{
-      print(textContent.left.get)
     }
   }
 }

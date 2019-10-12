@@ -19,15 +19,15 @@ object Commit {
       case Left(error) => print(error)
       case Right(result1) => {
         // We check if the file that contains the commit message exists if not we create it and we write the message in it
-        val pathFile = IO.buildPath(List(Repository.getRepositoryPath().right.get, nameFile))
+        val pathFile = IO.buildPath(List(Repository.getRepositoryPath().getOrElse(""), nameFile))
         if (!IO.fileExist(pathFile))
-          IO.createFile(Repository.getRepositoryPath().right.get, nameFile, messageCommit)
+          IO.createFile(Repository.getRepositoryPath().getOrElse(""), nameFile, messageCommit)
         else
           IO.writeInFile(pathFile, messageCommit, false)
 
         var commitContent = ""
-        val pathToRefHeads = Repository.getPathToRefHeads.right.get
-        val currentBranch = Branch.getCurrentBranch.right.get
+        val pathToRefHeads = Repository.getPathToRefHeads.getOrElse("")
+        val currentBranch = Branch.getCurrentBranch.getOrElse("")
         val shaTree = IO.listToString(result1)
 
         // We get the sha1 of the last commit if there is one (nil if there's not) and we create a the commit file

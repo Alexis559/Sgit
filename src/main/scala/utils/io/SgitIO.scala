@@ -32,23 +32,6 @@ object SgitIO {
   }
 
   /**
-   * Recursive function to convert a List of String into Map.
-   *
-   * @param list the List of String
-   * @param map  the Map that we will return
-   * @return the Map construct from the List
-   */
-  @tailrec
-  def listToMapRec(list: List[String], map: Map[String, Any]): Map[String, Any] = {
-    if (list.isEmpty)
-      map
-    else {
-      val newList: List[String] = list.drop(1)
-      listToMapRec(newList, Map(list.head -> map))
-    }
-  }
-
-  /**
    * Recursive function to merge a list of Maps.
    *
    * @param listMap the list of Maps
@@ -56,6 +39,7 @@ object SgitIO {
    */
   @tailrec
   def mergeMaps(listMap: List[Map[String, Any]]): Map[String, Any] = {
+    print(listMap)
     if (listMap.size == 1) {
       listMap(0)
     } else {
@@ -66,13 +50,30 @@ object SgitIO {
   }
 
   /**
+   * Recursive function to convert a List of String into Map.
+   *
+   * @param list the List of String
+   * @param map  the Map that we will return
+   * @return the Map construct from the List
+   */
+  @tailrec
+  private def listToMapRec(list: List[String], map: Map[String, Any]): Map[String, Any] = {
+    if (list.isEmpty)
+      map
+    else {
+      val newList: List[String] = list.drop(1)
+      listToMapRec(newList, Map(list.head -> map))
+    }
+  }
+
+  /**
    * Function to merge two maps.
    *
    * @param map1 the first map
    * @param map2 the second map
    * @return the merge between the two maps
    */
-  def mergeMap(map1: Map[String, Any], map2: Map[String, Any]): Map[String, Map[String, Any]] = {
+  private def mergeMap(map1: Map[String, Any], map2: Map[String, Any]): Map[String, Map[String, Any]] = {
     val keySet = map1.keySet ++ map2.keySet
 
     def nodeForKey(parent: Map[String, Any], key: String): Map[String, Any] = parent.getOrElse(key, Map.empty).asInstanceOf[Map[String, Any]]

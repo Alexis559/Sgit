@@ -28,7 +28,7 @@ object Tree{
             // We merge each Map to get a unique Map representing the working directory of the project
             val mergedListMap = SgitIO.mergeMaps(listMap)
             // We create the files according to the Map
-            writeTree(Map(Repository.getRepoName.right.get -> mergedListMap)) match {
+            writeTree(Map(Repository.getRepoName.getOrElse("") -> mergedListMap)) match {
               case Left(error) => Left(error)
               case Right(result) => Right(result)
             }
@@ -53,7 +53,7 @@ object Tree{
       if (x._1.contains(".txt")) {
         listTree = ("blob " + x._2.asInstanceOf[Map[String, Any]].head._1 + " " + x._1 + "\n") :: listTree
       } else {
-        listChildren = IO.listToString(writeTree(x._2.asInstanceOf[Map[String, Any]]).right.get) :: listChildren
+        listChildren = IO.listToString(writeTree(x._2.asInstanceOf[Map[String, Any]]).getOrElse(List(""))) :: listChildren
         // We create the hash with the content of the file that we will create
         val shaChildrenContent = SgitIO.sha(IO.listToString(listChildren))
         // We create the tree line

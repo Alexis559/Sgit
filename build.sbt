@@ -6,7 +6,8 @@ lazy val root = (project in file("."))
     name := "sgit",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.0.8" % "test",
-      "com.github.scopt" %% "scopt" % "4.0.0-RC2"
+      "com.github.scopt" %% "scopt" % "4.0.0-RC2",
+      "org.scalactic" % "scalactic_2.13" % "3.0.8"
     )
   )
 

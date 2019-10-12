@@ -2,6 +2,8 @@ package utils.io
 
 import java.io.{File, FileWriter, PrintWriter}
 
+import core.repository.Repository
+
 import scala.io.Source
 
 object IO {
@@ -75,10 +77,10 @@ object IO {
   }
 
   /**
-   * Function to read the content of a file.
+   * Function to read the content of a file line by line.
    *
    * @param pathFile path to the file to read
-   * @return Either left: error message, Either right: the content of the file in String format
+   * @return Either left: error message, Either right: the content of the file in a List of String
    */
   def readContentFile(pathFile: String): Either[String, List[String]] = {
     if(new File(pathFile).exists()) {
@@ -92,7 +94,7 @@ object IO {
   }
 
   /**
-   * Function to know if a file exists
+   * Function to know if a file exists.
    *
    * @param pathFile the path to the file
    * @return true if the file exists else false
@@ -117,20 +119,28 @@ object IO {
   }
 
   /**
-   * Function to get the path of a file.
+   * Function to clean the path of a file.
    *
    * @param path path to the file
    * @return Either left: error message, Either right: the path in String format to the file
    */
-  def getPathFile(path: String): Either[String, String] = {
+  def cleanPathFile(path: String): Either[String, String] = {
     val file = new File(path)
     if(file.exists()) {
-      var path = file.getPath.replace("." + File.separator, "")
+      var path = file.getPath
+      Repository.getRepositoryPath() match {
+        case Left(error) => Left(error)
+        case Right(result) => {
+          val pathRepo = new File(result).getParent + File.separator
+          path = path.replace(pathRepo, "")
+          path = path.replace("." + File.separator, "")
 
-      if (path.startsWith("."))
-        path = path.replaceFirst(".", "")
+          if (path.startsWith("."))
+            path = path.replaceFirst(".", "")
 
-      Right(path)
+          Right(path)
+        }
+      }
     } else {
       Left("File " + path + "doesn't exist !\n")
     }
@@ -158,5 +168,14 @@ object IO {
       "\\\\"
     else
       "/"
+  }
+
+  def deleteRecursively(file: File): Unit = {
+    if (file.isDirectory) {
+      file.listFiles.foreach(deleteRecursively)
+    }
+    if (file.exists && !file.delete) {
+      throw new Exception(s"Unable to delete ${file.getAbsolutePath}")
+    }
   }
 }

@@ -3,11 +3,26 @@ package core.repository
 import java.io.File
 
 import utils.io.IO
-import utils.io.IO.buildPath
 
 import scala.annotation.tailrec
 
 object Repository {
+
+  val listDir: Array[String] = Array(IO.buildPath(List("refs", "head")), IO.buildPath(List("refs", "tag")), "objects", "branches")
+
+  /**
+   * Function that initialize the .sgit repository.
+   *
+   * @param path where we want to create the new repository
+   */
+  def createRepository(path: String): Unit = {
+    val repoPath = IO.buildPath(List(path, getSgitName))
+    IO.createDirectory(path, getSgitName)
+    listDir.foreach(x => IO.createDirectory(repoPath, x))
+    IO.createFile(repoPath, "description", "Unnamed repository, edit this file 'description' to name the repository.\n")
+    IO.createFile(repoPath, "HEAD", "ref: " + IO.buildPath(List("refs", "head", "master")) + "\n")
+    IO.createFile(repoPath, "index", "")
+  }
 
   /**
    * Function to get the name of the directory where are stored the system files.
@@ -38,11 +53,11 @@ object Repository {
    */
   @tailrec
   def getRepositoryPath(path: String = IO.getCurrentPath): Either[String, String] = {
-    val file = new File(buildPath(List(path, getSgitName)))
-    val index = new File(buildPath(List(file.getAbsolutePath, "index")))
-    val head = new File(buildPath(List(file.getAbsolutePath, "HEAD")))
-    val objects = new File(buildPath(List(file.getAbsolutePath, "objects")))
-    val refs = new File(buildPath(List(file.getAbsolutePath, "refs")))
+    val file = new File(IO.buildPath(List(path, getSgitName)))
+    val index = new File(IO.buildPath(List(file.getAbsolutePath, "index")))
+    val head = new File(IO.buildPath(List(file.getAbsolutePath, "HEAD")))
+    val objects = new File(IO.buildPath(List(file.getAbsolutePath, "objects")))
+    val refs = new File(IO.buildPath(List(file.getAbsolutePath, "refs")))
 
     if (file.exists() && index.exists() && head.exists() && objects.exists() && refs.exists()) {
       Right(file.getAbsolutePath)
@@ -61,7 +76,7 @@ object Repository {
   def getPathToObject: Either[String, String] = {
     getRepositoryPath() match {
       case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "objects")))
+      case Right(result) => Right(IO.buildPath(List(result, "objects")))
     }
   }
 
@@ -73,7 +88,7 @@ object Repository {
   def getPathToIndex: Either[String, String] = {
     getRepositoryPath() match {
       case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "index")))
+      case Right(result) => Right(IO.buildPath(List(result, "index")))
     }
   }
 
@@ -85,7 +100,7 @@ object Repository {
   def getPathToHead: Either[String, String] = {
     getRepositoryPath() match {
       case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "HEAD")))
+      case Right(result) => Right(IO.buildPath(List(result, "HEAD")))
     }
   }
 
@@ -97,7 +112,7 @@ object Repository {
   def getPathToRefHeads: Either[String, String] = {
     getRepositoryPath() match {
       case Left(error) => Left(error)
-      case Right(result) => Right(buildPath(List(result, "refs", "head")))
+      case Right(result) => Right(IO.buildPath(List(result, "refs", "head")))
     }
   }
 }
