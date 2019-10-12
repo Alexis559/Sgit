@@ -5,8 +5,10 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 
 class TreeTest extends FlatSpec with BeforeAndAfterEach {
 
+  val currentPath: String = System.getProperty("user.dir")
+
   override def beforeEach(): Unit = {
-    Repository.createRepository(System.getProperty("user.dir"))
+    Repository.createRepository(currentPath)
   }
 
   // TODO

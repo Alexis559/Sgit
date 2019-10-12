@@ -6,12 +6,17 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 import utils.io.{IO, SgitIO}
 
 class CommitTest extends FlatSpec with BeforeAndAfterEach {
+
+  val currentPath: String = System.getProperty("user.dir")
+  val filename = "filetest.txt"
+  val repoDir: String = Repository.getSgitName
+
   override def beforeEach(): Unit = {
     Repository.createRepository(System.getProperty("user.dir"))
   }
 
   it should "update the sha1 in the current Branch file" in {
-    Blob.treatBlob(IO.buildPath(List(System.getProperty("user.dir"), ".sgit", "filetest.txt")))
+    Blob.treatBlob(IO.buildPath(List(currentPath, repoDir, filename)))
     Commit.commit("test")
     Commit.updateCommitBranch(SgitIO.sha("testSha1"))
     Branch.getCurrentBranch match {

@@ -6,8 +6,10 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 
 class BranchTest extends FlatSpec with BeforeAndAfterEach {
 
+  val currentPath: String = System.getProperty("user.dir")
+
   override def beforeEach(): Unit = {
-    Repository.createRepository(System.getProperty("user.dir"))
+    Repository.createRepository(currentPath)
   }
 
   it should "return the current Branch name" in {
