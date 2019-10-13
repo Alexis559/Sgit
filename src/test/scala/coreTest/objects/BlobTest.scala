@@ -17,7 +17,7 @@ class BlobTest extends FlatSpec with BeforeAndAfterEach {
 
   it should "create a blob with the good content" in {
     IO.createFile(IO.buildPath(List(currentPath, repoDir)), filename, textcontent)
-    Blob.treatBlob(IO.buildPath(List(currentPath, repoDir, filename)))
+    Blob.treatBlob(List(IO.buildPath(List(currentPath, repoDir, filename))))
     val sha = SgitIO.sha(textcontent)
     val dirName = sha.substring(0, 2)
     val fileName = sha.substring(2)
@@ -33,7 +33,7 @@ class BlobTest extends FlatSpec with BeforeAndAfterEach {
 
   it should "update the index file" in {
     IO.createFile(IO.buildPath(List(currentPath, repoDir)), filename, textcontent)
-    Blob.treatBlob(IO.buildPath(List(currentPath, repoDir, filename)))
+    Blob.treatBlob(List(IO.buildPath(List(currentPath, repoDir, filename))))
     val sha = SgitIO.sha(textcontent)
     val dirName = sha.substring(0, 2)
     val fileName = sha.substring(2)

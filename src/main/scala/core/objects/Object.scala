@@ -1,7 +1,7 @@
 package core.objects
 
 import core.repository.Repository
-import utils.io.IO
+import utils.io.{IO, SgitIO}
 
 object Object{
 
@@ -14,7 +14,7 @@ object Object{
   def getObjectFilePath(shaObject: String): Either[String, String] = {
     getObjectPath(shaObject) match {
       case Left(error) => Left(error)
-      case Right(result) => Right(IO.buildPath(List(result, shaObject.substring(3))))
+      case Right(result) => Right(IO.buildPath(List(result, shaObject.substring(2))))
     }
   }
 
@@ -47,6 +47,15 @@ object Object{
         Right(null)
       }
       case Left(error) => Left(error)
+    }
+  }
+
+  def returnNewSha(pathFile: String): Either[String, String] = {
+    IO.readContentFile(pathFile) match {
+      case Left(error) => Left(error)
+      case Right(result) => {
+        Right(SgitIO.sha(IO.listToString(result)))
+      }
     }
   }
 }

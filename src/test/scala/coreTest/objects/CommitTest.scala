@@ -18,7 +18,7 @@ class CommitTest extends FlatSpec with BeforeAndAfterEach {
 
   it should "update the sha1 in the current Branch file" in {
     IO.createFile(IO.buildPath(List(currentPath, repoDir)), filename, textcontent)
-    Blob.treatBlob(IO.buildPath(List(currentPath, repoDir, filename)))
+    Blob.treatBlob(List(IO.buildPath(List(currentPath, repoDir, filename))))
     Commit.commit("test")
     Commit.updateCommitBranch(SgitIO.sha("testSha1"))
     Branch.getCurrentBranch match {

@@ -1,6 +1,6 @@
 import core.commands.{AddCmd, InitCmd}
 import core.objects.Commit
-import utils.io.IO
+import utils.io.{IO, SgitIO}
 import utils.parser.Parser._
 
 object Sgit extends App {
@@ -9,7 +9,7 @@ object Sgit extends App {
       case "init" => InitCmd.init(IO.getCurrentPath)
       case "add" => AddCmd.add(config.filesAdd)
       case "commit" => Commit.commit(config.commitName)
-      case "test" => Commit.commit("test") // TODO DELETE THIS AT THE END
+      case "test" => print(SgitIO.listFiles(System.getProperty("user.dir"))) // TODO DELETE THIS AT THE END
       case _ => print(config)
     }
     case _ => print("No args given")

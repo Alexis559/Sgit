@@ -1,7 +1,10 @@
 package utils.io
 
+import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
+
+import core.repository.Repository
 
 import scala.annotation.tailrec
 
@@ -39,7 +42,6 @@ object SgitIO {
    */
   @tailrec
   def mergeMaps(listMap: List[Map[String, Any]]): Map[String, Any] = {
-    print(listMap)
     if (listMap.size == 1) {
       listMap(0)
     } else {
@@ -79,6 +81,22 @@ object SgitIO {
     def nodeForKey(parent: Map[String, Any], key: String): Map[String, Any] = parent.getOrElse(key, Map.empty).asInstanceOf[Map[String, Any]]
 
     keySet.map(key => (key -> mergeMap(nodeForKey(map1, key), nodeForKey(map2, key)))).toMap
+  }
+
+  def listFiles(pathFile: String = System.getProperty("user.dir")): List[String] = {
+    val files = listFilesRec(new File(pathFile)).toList
+    files.map(_.getPath)
+  }
+
+  private def listFilesRec(base: File, recursive: Boolean = true): Seq[File] = {
+    val files = base.listFiles
+    val result = files.filter(_.isFile)
+    result ++
+      files
+        .filter(_.isDirectory)
+        .filter(!_.getPath.contains(Repository.getRepositoryPath().getOrElse("")))
+        .filter(_ => recursive)
+        .flatMap(listFilesRec(_, recursive))
   }
 
 }

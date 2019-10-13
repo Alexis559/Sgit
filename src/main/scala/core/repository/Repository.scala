@@ -115,4 +115,27 @@ object Repository {
       case Right(result) => Right(IO.buildPath(List(result, "refs", "head")))
     }
   }
+
+  /**
+   * Function to know if a file is in the repository.
+   *
+   * @param filePath the file path in String format
+   * @return true is it's in else false
+   */
+  def isFileInRepo(filePath: String): Boolean = {
+    val file = new File(filePath)
+    if (file.exists() && file.isFile) {
+      Repository.getRepositoryPath() match {
+        case Left(error) => {
+          println("File " + filePath + " is not in a Sgit repository !")
+          false
+        }
+        case Right(result) => {
+          file.getAbsolutePath.contains(result.replace(Repository.getSgitName, ""))
+        }
+      }
+    } else {
+      false
+    }
+  }
 }

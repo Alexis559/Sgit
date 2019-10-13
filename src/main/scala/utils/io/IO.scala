@@ -133,8 +133,9 @@ object IO {
         case Right(result) => {
           val pathRepo = new File(result).getParent + File.separator
           path = path.replace(pathRepo, "")
-          path = path.replace("." + File.separator, "")
-
+          val pattern = "." + File.separator
+          if (path.startsWith(pattern))
+            path = path.replace("." + File.separator, "")
           if (path.startsWith("."))
             path = path.replaceFirst(".", "")
 
