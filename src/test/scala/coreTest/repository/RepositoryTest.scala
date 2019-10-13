@@ -84,8 +84,8 @@ class RepositoryTest extends FlatSpec with BeforeAndAfterEach {
 
   it should "return an error it's not a .sgit repository" in {
     Repository.getRepositoryPath(tempDirPath) match {
-      case Left(error) => assert(true)
-      case Right(result) => assert(false)
+      case Left(_) => assert(true)
+      case Right(_) => assert(false)
     }
   }
 }

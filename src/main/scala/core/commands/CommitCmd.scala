@@ -12,7 +12,7 @@ object CommitCmd {
   def commit(messageCommit: String): Unit = {
     Repository.getRepositoryPath() match {
       case Left(error) => print(error)
-      case Right(result) => Commit.commit(messageCommit)
+      case Right(_) => Commit.commit(messageCommit)
     }
   }
 }

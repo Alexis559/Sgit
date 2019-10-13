@@ -14,11 +14,11 @@ object Tree{
     // Get the path to the index file
     Repository.getPathToIndex match {
       case Left(error) => Left(error)
-      case Right(result) => {
+      case Right(result) =>
         // Read the content of the index file
         IO.readContentFile(result) match {
           case Left(error2) => Left(error2)
-          case Right(result2) => {
+          case Right(result2) =>
             // We split the content (sha and path) line by line
             val lines = result2.map(x => x.split(" "))
             // We split each path to get a list of the directories
@@ -32,9 +32,7 @@ object Tree{
               case Left(error) => Left(error)
               case Right(result) => Right(result)
             }
-          }
         }
-      }
     }
   }
 
@@ -61,10 +59,9 @@ object Tree{
         // We create the tree files
         Object.createObject(shaChildrenContent, IO.listToString(listChildren)) match {
           case Left(error) => return Left(error)
-          case Right(result) => {
+          case Right(_) =>
             // We had the tree to the list
             listTree = trtr :: listTree
-          }
         }
       }
     })

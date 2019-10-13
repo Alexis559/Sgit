@@ -57,8 +57,8 @@ class IOTest extends FlatSpec {
   it should "return an error if file doesn't exist" in {
     val tempDirPath = Files.createTempDirectory("RepoTestSgit").toString
     IO.readContentFile(IO.buildPath(List(tempDirPath, "test"))) match {
-      case Left(error) => assert(true)
-      case Right(result) => assert(false)
+      case Left(_) => assert(true)
+      case Right(_) => assert(false)
     }
   }
 
@@ -68,7 +68,7 @@ class IOTest extends FlatSpec {
     assert(IO.fileExist(IO.buildPath(List(tempDirPath, "test"))))
   }
 
-  it should "return false if file dooesn't exist" in {
+  it should "return false if file doesn't exist" in {
     val tempDirPath = Files.createTempDirectory("RepoTestSgit").toString
     assert(!IO.fileExist(IO.buildPath(List(tempDirPath, "test"))))
   }
@@ -76,7 +76,7 @@ class IOTest extends FlatSpec {
   it should "write in file without append" in {
     val tempDirPath = Files.createTempDirectory("RepoTestSgit").toString
     IO.createFile(tempDirPath, "test", "")
-    IO.writeInFile(IO.buildPath(List(tempDirPath, "test")), "test", false)
+    IO.writeInFile(IO.buildPath(List(tempDirPath, "test")), "test", append = false)
     val content = IO.readContentFile(IO.buildPath(List(tempDirPath, "test"))).getOrElse(List[String]())
     assert(content.size == 1 && content.head == "test")
   }
@@ -84,8 +84,8 @@ class IOTest extends FlatSpec {
   it should "write in file with append" in {
     val tempDirPath = Files.createTempDirectory("RepoTestSgit").toString
     IO.createFile(tempDirPath, "test", "")
-    IO.writeInFile(IO.buildPath(List(tempDirPath, "test")), "test1\n", false)
-    IO.writeInFile(IO.buildPath(List(tempDirPath, "test")), "test2", true)
+    IO.writeInFile(IO.buildPath(List(tempDirPath, "test")), "test1\n", append = false)
+    IO.writeInFile(IO.buildPath(List(tempDirPath, "test")), "test2", append = true)
     val content = IO.readContentFile(IO.buildPath(List(tempDirPath, "test"))).getOrElse(List[String]())
     assert(content.size == 2 && content.head == "test1" && content.tail.head == "test2")
   }

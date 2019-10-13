@@ -39,9 +39,29 @@ object Repository {
    * @return Either left: error message, Either right: the name in String format
    */
   def getRepoName: Either[String, String] = {
-    Repository.getRepositoryPath() match {
+    getPathToParenSgit match {
       case Left(error) => Left(error)
-      case Right(result) => Right(result.replace(Repository.getSgitName, "").split(IO.getRegexFileSeparator).last)
+      case Right(result) => Right(result.split(IO.getRegexFileSeparator).last)
+    }
+  }
+
+  /**
+   * Function to know if a file is in the repository.
+   *
+   * @param filePath the file path in String format
+   * @return true is it's in else false
+   */
+  def isFileInRepo(filePath: String): Boolean = {
+    getPathToParenSgit match {
+      case Left(_) =>
+        println("File " + filePath + " is not in a Sgit repository !")
+        false
+      case Right(result) =>
+        if (filePath.contains(result) && new File(filePath).exists()) {
+          true
+        } else {
+          new File(IO.buildPath(List(result, filePath))).exists()
+        }
     }
   }
 
@@ -117,25 +137,28 @@ object Repository {
   }
 
   /**
-   * Function to know if a file is in the repository.
+   * Function to get the absolute path of a file in the repository.
    *
-   * @param filePath the file path in String format
-   * @return true is it's in else false
+   * @param pathFile relative path of the file in the repository
+   * @return Either left: error message, Either right: the absolute path in a String format
    */
-  def isFileInRepo(filePath: String): Boolean = {
-    val file = new File(filePath)
-    if (file.exists() && file.isFile) {
-      Repository.getRepositoryPath() match {
-        case Left(error) => {
-          println("File " + filePath + " is not in a Sgit repository !")
-          false
-        }
-        case Right(result) => {
-          file.getAbsolutePath.contains(result.replace(Repository.getSgitName, ""))
-        }
-      }
-    } else {
-      false
+  def getAbsolutePathInRepo(pathFile: String): Either[String, String] = {
+    getPathToParenSgit match {
+      case Left(error) => Left(error)
+      case Right(value) => Right(IO.buildPath(List(value, pathFile)))
     }
   }
+
+  /**
+   * Function to get the path to the parent of the Sgit repository.
+   *
+   * @return Either left: error message, Either right: the path to the parent in a String format
+   */
+  def getPathToParenSgit: Either[String, String] = {
+    getRepositoryPath() match {
+      case Left(error) => Left(error)
+      case Right(path) => Right(new File(path).getParent)
+    }
+  }
+
 }

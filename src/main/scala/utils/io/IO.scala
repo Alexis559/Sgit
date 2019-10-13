@@ -130,7 +130,7 @@ object IO {
       var path = file.getPath
       Repository.getRepositoryPath() match {
         case Left(error) => Left(error)
-        case Right(result) => {
+        case Right(result) =>
           val pathRepo = new File(result).getParent + File.separator
           path = path.replace(pathRepo, "")
           val pattern = "." + File.separator
@@ -140,7 +140,6 @@ object IO {
             path = path.replaceFirst(".", "")
 
           Right(path)
-        }
       }
     } else {
       Left("File " + path + "doesn't exist !\n")

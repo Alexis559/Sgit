@@ -22,20 +22,17 @@ class CommitTest extends FlatSpec with BeforeAndAfterEach {
     Commit.commit("test")
     Commit.updateCommitBranch(SgitIO.sha("testSha1"))
     Branch.getCurrentBranch match {
-      case Left(error) => assert(false)
-      case Right(result1) => {
+      case Left(_) => assert(false)
+      case Right(result1) =>
         Repository.getPathToRefHeads match {
-          case Left(error) => assert(false)
-          case Right(result2) => {
+          case Left(_) => assert(false)
+          case Right(result2) =>
             IO.readContentFile(IO.buildPath(List(result2, result1))) match {
-              case Left(error) => assert(false)
-              case Right(result) => {
+              case Left(_) => assert(false)
+              case Right(result) =>
                 assert(IO.listToString(result).contains(SgitIO.sha("testSha1")))
-              }
             }
-          }
         }
-      }
     }
   }
 }

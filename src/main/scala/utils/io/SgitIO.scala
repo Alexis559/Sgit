@@ -80,7 +80,7 @@ object SgitIO {
 
     def nodeForKey(parent: Map[String, Any], key: String): Map[String, Any] = parent.getOrElse(key, Map.empty).asInstanceOf[Map[String, Any]]
 
-    keySet.map(key => (key -> mergeMap(nodeForKey(map1, key), nodeForKey(map2, key)))).toMap
+    keySet.map(key => key -> mergeMap(nodeForKey(map1, key), nodeForKey(map2, key))).toMap
   }
 
   def listFiles(pathFile: String = System.getProperty("user.dir")): List[String] = {
@@ -88,8 +88,15 @@ object SgitIO {
     files.map(_.getPath)
   }
 
-  private def listFilesRec(base: File, recursive: Boolean = true): Seq[File] = {
-    val files = base.listFiles
+  /**
+   * Function to list the files in a directory recursively.
+   *
+   * @param directory the directory where we want to get all the files.
+   * @param recursive
+   * @return a Sequence of File
+   */
+  private def listFilesRec(directory: File, recursive: Boolean = true): Seq[File] = {
+    val files = directory.listFiles
     val result = files.filter(_.isFile)
     result ++
       files

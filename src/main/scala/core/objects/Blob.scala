@@ -16,17 +16,15 @@ object Blob {
       // We read the content of the file
       IO.readContentFile(file) match {
         case Left(error) => println(error)
-        case Right(result) => {
+        case Right(result) =>
           // We hash the content
           val shaContent = SgitIO.sha(IO.listToString(result))
           // We get the path to the objects folder in .sgit
           Object.createObject(shaContent, IO.listToString(result)) match {
             case Left(error) => print(error)
-            case Right(result) => {
+            case Right(_) =>
               filesToAdd = Map(IO.cleanPathFile(file).getOrElse("") -> shaContent) :: filesToAdd
-            }
           }
-        }
       }
     })
     Index.updateIndex(filesToAdd)

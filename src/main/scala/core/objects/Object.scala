@@ -41,21 +41,25 @@ object Object{
     val dirName = sha.substring(0, 2)
     val fileName = sha.substring(2)
     Repository.getPathToObject match {
-      case Right(result) => {
+      case Right(result) =>
         IO.createDirectory(result, dirName)
         IO.createFile(IO.buildPath(List(result, dirName)), fileName, textContent)
         Right(null)
-      }
       case Left(error) => Left(error)
     }
   }
 
+  /**
+   * Function to get the sha of an existing file.
+   *
+   * @param pathFile the path to the file
+   * @return Either left: error message, Either right: the sha1 in a String format
+   */
   def returnNewSha(pathFile: String): Either[String, String] = {
     IO.readContentFile(pathFile) match {
       case Left(error) => Left(error)
-      case Right(result) => {
+      case Right(result) =>
         Right(SgitIO.sha(IO.listToString(result)))
-      }
     }
   }
 }

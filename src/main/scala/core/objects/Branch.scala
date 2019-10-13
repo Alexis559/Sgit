@@ -13,14 +13,12 @@ object Branch {
   def getCurrentBranch: Either[String, String] = {
     Repository.getPathToHead match {
       case Left(error) => Left(error)
-      case Right(result) => {
+      case Right(result) =>
         IO.readContentFile(result) match {
           case Left(error) => Left(error)
-          case Right(result) => {
+          case Right(result) =>
             Right(IO.listToString(result).split(IO.getRegexFileSeparator).last)
-          }
         }
-      }
     }
   }
 }

@@ -6,7 +6,9 @@ import scopt.OptionParser
  * Parser of the arguments with Scopt
  */
 object Parser {
-  def getParser(): OptionParser[Config] = {
+  def getConfig(arguments: Array[String]): Option[Config] = getParser.parse(arguments, Config())
+
+  def getParser: OptionParser[Config] = {
     new scopt.OptionParser[Config]("sgit") {
       head("sgit", "1.0")
 
@@ -110,7 +112,7 @@ object Parser {
             .action((_, c) => c.copy(interactive = true))
             .text("Make a list of the commits which are about to be rebased.")
             .children(
-              arg[String]("<commit hash or banch name>")
+              arg[String]("<commit hash or branch name>")
                 .action((x, c) => c.copy(branchName = x))
                 .required()
                 .text("Branch name or commit hash.")
@@ -129,7 +131,5 @@ object Parser {
 
     }
   }
-
-  def getConfig(arguments: Array[String]): Option[Config] = getParser().parse(arguments, Config())
 
 }

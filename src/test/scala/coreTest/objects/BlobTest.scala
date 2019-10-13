@@ -24,7 +24,7 @@ class BlobTest extends FlatSpec with BeforeAndAfterEach {
     val path = IO.buildPath(List(currentPath, repoDir, "objects", dirName, fileName))
     if (IO.fileExist(path))
       IO.readContentFile(path) match {
-        case Left(error) => assert(false)
+        case Left(_) => assert(false)
         case Right(result) => assert(IO.listToString(result) == textcontent)
       }
     else
@@ -35,13 +35,10 @@ class BlobTest extends FlatSpec with BeforeAndAfterEach {
     IO.createFile(IO.buildPath(List(currentPath, repoDir)), filename, textcontent)
     Blob.treatBlob(List(IO.buildPath(List(currentPath, repoDir, filename))))
     val sha = SgitIO.sha(textcontent)
-    val dirName = sha.substring(0, 2)
-    val fileName = sha.substring(2)
     IO.readContentFile(Repository.getPathToIndex.getOrElse("")) match {
-      case Left(error) => assert(false)
-      case Right(result) => {
+      case Left(_) => assert(false)
+      case Right(result) =>
         assert(IO.listToString(result).contains(sha))
-      }
     }
   }
 }

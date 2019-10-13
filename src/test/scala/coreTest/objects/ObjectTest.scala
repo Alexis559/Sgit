@@ -23,7 +23,7 @@ class ObjectTest extends FlatSpec with BeforeAndAfterEach {
     val path = IO.buildPath(List(currentPath, repoDir, "objects", dirName, fileName))
     if (IO.fileExist(path))
       IO.readContentFile(path) match {
-        case Left(error) => assert(false)
+        case Left(_) => assert(false)
         case Right(result) => assert(IO.listToString(result) == textcontent)
       }
     else
