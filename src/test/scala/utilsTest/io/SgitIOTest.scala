@@ -42,10 +42,10 @@ class SgitIOTest extends FlatSpec {
 
   it should "return the list of files" in {
     Repository.createRepository(System.getProperty("user.dir"))
-    val seq = Seq("description", "HEAD", "index")
+    val seq = List("HEAD", "description", "index")
     val files = SgitIO.listFilesRec(new File(IO.buildPath(List(".sgit")))).map(_.getName)
 
-    assert(seq == files)
+    assert(seq.toSeq.sorted == files.toSeq.sorted)
   }
 
   it should "return an empty list of files" in {
