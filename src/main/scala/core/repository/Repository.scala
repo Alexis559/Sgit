@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 
 object Repository {
 
-  val listDir: Array[String] = Array(IO.buildPath(List("refs", "head")), IO.buildPath(List("refs", "tag")), "objects", "branches")
+  val listDir: Array[String] = Array(IO.buildPath(List("refs", "head")), IO.buildPath(List("refs", "tags")), "objects", "branches")
 
   /**
    * Function that initialize the .sgit repository.
@@ -89,7 +89,7 @@ object Repository {
   }
 
   /**
-   * Function to get the path to the object folder in .sgit
+   * Function to get the path to the objects folder in .sgit
    *
    * @return Either left: error message, Either right: the path in String format to the objects folder
    */
@@ -125,14 +125,26 @@ object Repository {
   }
 
   /**
-   * Function to get the path to the HEAD file in .sgit
+   * Function to get the path to the refs/head file in .sgit
    *
-   * @return Either left: error message, Either right: the path in String format to the HEAD file
+   * @return Either left: error message, Either right: the path in String format to the refs/head file
    */
   def getPathToRefHeads: Either[String, String] = {
     getRepositoryPath() match {
       case Left(error) => Left(error)
       case Right(result) => Right(IO.buildPath(List(result, "refs", "head")))
+    }
+  }
+
+  /**
+   * Function to get the path to the tags folder in .sgit
+   *
+   * @return Either left: error message, Either right: the path in String format to the tags folder
+   */
+  def getPathToRefTags: Either[String, String] = {
+    getRepositoryPath() match {
+      case Left(error) => Left(error)
+      case Right(result) => Right(IO.buildPath(List(result, "refs", "tags")))
     }
   }
 

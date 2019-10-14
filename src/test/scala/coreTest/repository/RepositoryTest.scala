@@ -50,7 +50,7 @@ class RepositoryTest extends FlatSpec with BeforeAndAfterEach {
 
   it should "create tag directory in a refs directory in .sgit directory" in {
     Repository.createRepository(tempDirPath)
-    val path = IO.buildPath(List(tempDirPath, repoDir, "refs", "tag"))
+    val path = IO.buildPath(List(tempDirPath, repoDir, "refs", "tags"))
     val file = new File(path)
     assert(file.exists() && file.isDirectory)
   }

@@ -89,7 +89,7 @@ object Parser {
         .children(
           arg[String](name = "<tag name>")
             .action((x, c) => c.copy(tagName = x))
-            .required()
+            .optional()
             .text("Tag name.")
         )
       cmd("merge")
