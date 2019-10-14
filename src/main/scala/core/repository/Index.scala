@@ -14,22 +14,25 @@ object Index {
     getIndex match {
       case Left(error) => println(error)
       case Right(indexMap) =>
-        var index = List[Map[String, String]]()
+        var index1 = List[Map[String, String]]()
+        var index2 = List[Map[String, String]]()
         // We check if the files in the index are always present in the repository
         val filesExisting = indexMap.filter(file => Repository.isFileInRepo(file.head._1))
-        filesExisting.foreach(x => {
+        index1 = filesExisting.map(x => {
           // If they always exist then we check for the content update (new hash)
-          index = Map(x.head._1 -> Object.returnNewSha(Repository.getAbsolutePathInRepo(x.head._1).getOrElse("")).getOrElse("")) :: index
+          Map(x.head._1 -> Object.returnNewSha(Repository.getAbsolutePathInRepo(x.head._1).getOrElse("")).getOrElse(""))
         })
         // We had the new files to the index
         if (listFiles != null && listFiles.nonEmpty) {
-          val values = index.map(x => x.head._1)
-          listFiles.foreach(x => {
+          val values = index1.map(x => x.head._1)
+          index2 = listFiles.filterNot(x => values.contains(x.head._1))
+            .map(x => Map(x.head._1 -> x.head._2))
+          /*listFiles.foreach(x => {
             if (!values.contains(x.head._1))
               index = Map(x.head._1 -> x.head._2) :: index
-          })
+          })*/
         }
-        writeIndex(index)
+        writeIndex(index1 ::: index2)
     }
   }
 
@@ -71,9 +74,9 @@ object Index {
    */
   def writeIndex(index: List[Map[String, String]]): Unit = {
     var textContent: String = ""
-    index.foreach(x => {
-      textContent = textContent + (x.head._2 + " " + x.head._1 + "\n")
-    })
+    textContent = IO.listToString(index.map(x => {
+      textContent + (x.head._2 + " " + x.head._1 + "\n")
+    }))
     Repository.getPathToIndex match {
       case Left(value) => print(value)
       case Right(value) =>

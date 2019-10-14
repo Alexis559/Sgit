@@ -145,16 +145,29 @@ object Commit {
         IO.readContentFile(pathCommit) match {
           case Left(error) => Left(error)
           case Right(contentCommit) =>
-            var listMap = Map[String, Any]()
-            contentCommit.foreach(x => {
+            var listBlob = Map[String, Any]()
+            var listTree = Map[String, Any]()
+
+            listBlob = contentCommit.map(x => x.split(" "))
+              .filter(x => x(0) == "blob")
+              .map(x => x(2) -> x(1))
+              .toMap
+
+            listTree = contentCommit.map(x => x.split(" "))
+              .filter(x => x(0) == "tree")
+              .map(x => x(2) -> commitToMap(x(1)).getOrElse(Map()))
+              .toMap
+
+
+            /*contentCommit.foreach(x => {
               val line = x.split(" ")
               if (line(0) == "blob") {
                 listMap = listMap + (line(2) -> line(1))
               } else if (line(0) == "tree") {
                 listMap = listMap + (line(2) -> commitToMap(line(1)).getOrElse(Map()))
               }
-            })
-            Right(listMap)
+            })*/
+            Right(listBlob ++ listTree)
         }
     }
   }
@@ -193,14 +206,14 @@ object Commit {
   /**
    * Function to convert the Commit in Map format to a List format.
    *
-   * @param map the Commit in Map format
+   * @param mapCommit the Commit in Map format
    * @return Either left: error message, Either right: the Commit in a List format
    */
-  private def commitMapToListRec(map: Map[String, Any]): Either[String, List[String]] = {
+  private def commitMapToListRec(mapCommit: Map[String, Any]): Either[String, List[String]] = {
     var list = List[String]()
-    map.foreach(x => {
+    mapCommit.foreach(x => {
       var path = List[String]()
-      if (x._1.contains(".txt") && x._2.asInstanceOf[String].length == 40) {
+      if (x._1.contains(".txt") || x._2.asInstanceOf[String].length == 40) {
         list = x._1 + " " + x._2 :: list
       } else {
         path = path ::: commitMapToListRec(x._2.asInstanceOf[Map[String, Any]]).getOrElse(List()).map(p => x._1 + File.separator + p)

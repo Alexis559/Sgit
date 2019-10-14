@@ -18,7 +18,7 @@ object Repository {
   def createRepository(path: String): Unit = {
     val repoPath = IO.buildPath(List(path, getSgitName))
     IO.createDirectory(path, getSgitName)
-    listDir.foreach(x => IO.createDirectory(repoPath, x))
+    listDir.map(x => IO.createDirectory(repoPath, x))
     IO.createFile(repoPath, "description", "Unnamed repository, edit this file 'description' to name the repository.\n")
     IO.createFile(repoPath, "HEAD", "ref: " + IO.buildPath(List("refs", "head", "master")) + "\n")
     IO.createFile(repoPath, "index", "")

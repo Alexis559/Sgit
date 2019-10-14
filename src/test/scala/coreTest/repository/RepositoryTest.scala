@@ -17,6 +17,10 @@ class RepositoryTest extends FlatSpec with BeforeAndAfterEach {
     tempDirPath = Files.createTempDirectory("RepoTestSgit").toString
   }
 
+  override def afterEach(): Unit = {
+    IO.deleteRecursively(new File(IO.buildPath(List(System.getProperty("user.dir"), ".sgit"))))
+  }
+
   it should "create the .sgit directory" in {
     Repository.createRepository(tempDirPath)
     val path = IO.buildPath(List(tempDirPath, repoDir))

@@ -48,7 +48,7 @@ object Tree{
       // If a branch has many children we will stock them in this list
       var listChildren = List[String]()
       // If we are at the end of a branch the Map then it's a blob
-      if (x._1.contains(".txt")) {
+      if (x._1.contains(".txt") || x._2.asInstanceOf[Map[String, Any]].head._1.length == 40) {
         listTree = ("blob " + x._2.asInstanceOf[Map[String, Any]].head._1 + " " + x._1 + "\n") :: listTree
       } else {
         listChildren = IO.listToString(writeTree(x._2.asInstanceOf[Map[String, Any]]).getOrElse(List(""))) :: listChildren

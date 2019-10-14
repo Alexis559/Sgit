@@ -15,10 +15,13 @@ object AddCmd {
   def add(filesAdd: List[String]): Unit = {
     Repository.getRepositoryPath() match {
       case Left(error) => print(error)
-      case Right(_) =>
+      case Right(result) =>
         if (filesAdd.head == ".")
-        // We add all the files recursively in the current directory and subdirectory
-          Blob.treatBlob(SgitIO.listFiles())
+          if (!System.getProperty("user.dir").contains(result))
+          // We add all the files recursively in the current directory and subdirectory
+            Blob.treatBlob(SgitIO.listFiles())
+          else
+            println("You can't do this action here.")
         else {
           // We get the Canonical path to avoid relative paths
           val filesPathCanonical = filesAdd.map(x => new File(x).getCanonicalPath)

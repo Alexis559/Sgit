@@ -95,7 +95,7 @@ object SgitIO {
    * @param recursive
    * @return a Sequence of File
    */
-  private def listFilesRec(directory: File, recursive: Boolean = true): Seq[File] = {
+  def listFilesRec(directory: File, recursive: Boolean = true): Seq[File] = {
     val files = directory.listFiles
     val result = files.filter(_.isFile)
     result ++

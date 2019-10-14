@@ -1,5 +1,7 @@
 package coreTest.objects
 
+import java.io.File
+
 import core.objects.Blob
 import core.repository.Repository
 import org.scalatest.{BeforeAndAfterEach, FlatSpec}
@@ -13,6 +15,10 @@ class BlobTest extends FlatSpec with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     Repository.createRepository(currentPath)
+  }
+
+  override def afterEach(): Unit = {
+    IO.deleteRecursively(new File(IO.buildPath(List(System.getProperty("user.dir"), ".sgit"))))
   }
 
   it should "create a blob with the good content" in {

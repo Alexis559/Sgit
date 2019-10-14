@@ -61,7 +61,7 @@ object IO {
    */
   def buildPath(listPath: List[String]): String = {
     var path = ""
-    listPath.foreach(x => path = path + x + File.separator)
+    path = listPath.map(x => path + x + File.separator).mkString
     path.substring(0, path.length - 1)
   }
 
@@ -153,9 +153,7 @@ object IO {
    * @return the String
    */
   def listToString(list: List[String]): String = {
-    val string: StringBuilder = new StringBuilder()
-    list.foreach(x => string.append(x))
-    string.toString()
+    list.mkString
   }
 
   /**

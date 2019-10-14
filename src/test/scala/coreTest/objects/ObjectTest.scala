@@ -1,5 +1,7 @@
 package coreTest.objects
 
+import java.io.File
+
 import core.objects.Object
 import core.repository.Repository
 import org.scalatest.{BeforeAndAfterEach, FlatSpec}
@@ -13,6 +15,10 @@ class ObjectTest extends FlatSpec with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     Repository.createRepository(currentPath)
+  }
+
+  override def afterEach(): Unit = {
+    IO.deleteRecursively(new File(IO.buildPath(List(System.getProperty("user.dir"), ".sgit"))))
   }
 
   it should "create an object with the good content" in {

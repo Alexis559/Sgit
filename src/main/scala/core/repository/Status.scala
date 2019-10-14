@@ -35,7 +35,7 @@ object Status {
                     }
                     // If it's the first commit and the index is not empty then we display it's content
                     else if (first && IO.readContentFile(Repository.getPathToIndex.getOrElse("")).getOrElse(List()).nonEmpty) {
-                      listTrackedFiles match {
+                      listNewFilesFirstCommit match {
                         case Left(value) => println(value)
                         case Right(value) =>
                           println("\nChanges to be committed: ")
@@ -59,7 +59,7 @@ object Status {
    *
    * @return Either left: error message, Either right: the index in a List of String
    */
-  def listTrackedFiles: Either[String, List[String]] = {
+  def listNewFilesFirstCommit: Either[String, List[String]] = {
     Index.getTrackedFiles match {
       case Left(value) => Left(value)
       case Right(value) =>
@@ -99,25 +99,24 @@ object Status {
     Index.getIndex match {
       case Left(error) => Left(error)
       case Right(indexMap) =>
-        var index = List[Map[String, String]]()
         // List of files that exists
         val filesExisting = indexMap.filter(file => Repository.isFileInRepo(file.head._1))
         // List of files that doesn't exist anymore
         val filesDeleted = indexMap.filterNot(file => Repository.isFileInRepo(file.head._1))
 
-        index = filesDeleted.map(x => {
+        var mapFilesDeleted = List[Map[String, String]]()
+        var mapFilesModified = List[Map[String, String]]()
+
+        mapFilesDeleted = filesDeleted.map(x => {
           Map(x.head._1 -> "deleted")
         })
 
         val pathRepo = Repository.getRepositoryPath().getOrElse("")
 
-        filesExisting.foreach(x => {
-          // If the new sha is different of the old one then the file has been modified
-          if (Object.returnNewSha(IO.buildPath(List(pathRepo.replace(Repository.getSgitName, ""), x.head._1))).getOrElse("") != x.head._2) {
-            index = Map(x.head._1 -> "modified") :: index
-          }
-        })
-        Right(index)
+        mapFilesModified = filesExisting.filter(x => (Object.returnNewSha(IO.buildPath(List(pathRepo.replace(Repository.getSgitName, ""), x.head._1))).getOrElse("") != x.head._2))
+          .map(x => Map(x.head._1 -> "modified"))
+
+        Right(mapFilesDeleted ::: mapFilesModified)
     }
   }
 
@@ -130,26 +129,30 @@ object Status {
     Index.getIndex match {
       case Left(error) => Left(error)
       case Right(indexMap) =>
-        var files = List[Map[String, String]]()
+        var filesDeleted = List[Map[String, String]]()
+        var filesModified = List[Map[String, String]]()
+        var filesAdded = List[Map[String, String]]()
         Commit.getLastCommitIndex match {
           case Left(error) => Left(error)
           case Right(indexCommit) => {
             val commitFlat = indexCommit.flatMap(x => x.split(" "))
             val indexKeys = indexMap.flatMap(x => x.keySet)
-            val indexValues = indexMap.map(x => x.head._2)
-            indexCommit.foreach(x => {
-              val line = x.split(" ")
-              if (!indexKeys.contains(line(0)))
-                files = Map(line(0) -> "deleted") :: files
-              else if (indexKeys.contains(line(0)) && !indexValues.contains(line(1)))
-                files = Map(line(0) -> "modified") :: files
-            })
-            indexMap.foreach(x => {
-              if (!commitFlat.contains(x.head._1))
-                files = Map(x.head._1 -> "added") :: files
-            })
+
+            filesDeleted = indexCommit
+              .map(_.split(" ")(0))
+              .filterNot(indexKeys.contains(_))
+              .map(x => Map(x -> "deleted"))
+
+            filesModified = indexCommit
+              .map(_.split(" "))
+              .filter(x => indexKeys.contains(x(0)) && !indexKeys.contains(x(1)))
+              .map(y => Map(y(0) -> "modified"))
+
+            filesAdded = indexMap
+              .filterNot(x => commitFlat.contains(x.head._1))
+              .map(y => Map(y.head._1 -> "added"))
           }
-            Right(files)
+            Right(filesDeleted ::: filesModified ::: filesAdded)
         }
     }
   }
@@ -161,9 +164,9 @@ object Status {
    */
   def printMapStatus(map: List[Map[String, String]]): Unit = {
     println("\n")
-    map.foreach(x => {
-      println("\t" + x.head._2 + ": " + x.head._1)
-    })
+    print(map.map(x => {
+      ("\t" + x.head._2 + ": " + x.head._1 + "\n")
+    }).mkString)
   }
 
   /**
@@ -173,8 +176,6 @@ object Status {
    * @return the List in String format
    */
   def listToStringStatus(list: List[String]): String = {
-    val string: StringBuilder = new StringBuilder()
-    list.foreach(x => string.append("\t" + x + "\n"))
-    string.toString()
+    list.map(x => "\t" + x + "\n").mkString
   }
 }

@@ -1,12 +1,19 @@
 package utilsTest.io
 
+import java.io.File
+
+import core.repository.Repository
 import org.scalatest.FlatSpec
-import utils.io.SgitIO
+import utils.io.{IO, SgitIO}
 
 class SgitIOTest extends FlatSpec {
 
   it should "return the correct hash" in {
     assert(SgitIO.sha("testSha1") == "62f9fcdfc06f4499eb9573d0a4575de4cdbc586a")
+  }
+
+  it should "return false with a false hash" in {
+    assert(SgitIO.sha("testSha1") != "123456dfc06f4499eb9573d0a4575de4cdbc586a")
   }
 
   it should "create a map from the list (1)" in {
@@ -32,4 +39,20 @@ class SgitIOTest extends FlatSpec {
     assert(size == 2 && keys.contains("test") && keys.contains("test2"))
 
   }
+
+  it should "return the list of files" in {
+    Repository.createRepository(System.getProperty("user.dir"))
+    val seq = Seq("description", "HEAD", "index")
+    val files = SgitIO.listFilesRec(new File(IO.buildPath(List(".sgit")))).map(_.getName)
+
+    assert(seq == files)
+  }
+
+  it should "return an empty list of files" in {
+    Repository.createRepository(System.getProperty("user.dir"))
+    val files = SgitIO.listFilesRec(new File(IO.buildPath(List(".sgit", "refs")))).map(_.getName)
+
+    assert(files.isEmpty)
+  }
+
 }
