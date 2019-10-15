@@ -22,24 +22,27 @@ object DiffAlgo {
   }
 
   /**
-   * Function to create a "matrix" after the LCS algorithm.
+   * Function to create a "matrix" for the LCS algorithm.
    *
-   * @param contentNewFile
-   * @param contentOldFile
-   * @return
+   * @param contentNewFile the content of the new file
+   * @param contentOldFile the content of the old file
+   * @return matrix of comparaison between the two files
    */
   def createMatrix(contentNewFile: List[String], contentOldFile: List[String]): Map[(Int, Int), Int] = {
     val matrix = Map[(Int, Int), Int]()
 
     @scala.annotation.tailrec
     def fillMatrix(matrix: Map[(Int, Int), Int], row: Int, column: Int): Map[(Int, Int), Int] = {
+      // If there's no more lines to check in the new file then we return the matrix
       if (row > contentNewFile.length) {
         matrix
       }
+      // If we are at the end of the old file, we change of line in the new file
       else if (column > contentOldFile.length) {
         fillMatrix(matrix, row + 1, 0)
       }
       else {
+        // To create a first row and column full of 0 used for the LCS algorithm
         if (row == 0 || column == 0)
           fillMatrix(matrix ++ Map((row, column) -> 0), row, column + 1)
         else {
