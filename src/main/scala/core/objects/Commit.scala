@@ -18,7 +18,7 @@ object Commit {
   def commit(messageCommit: String): Unit = {
     // We build the commit tree with the content of the index file
     Tree.buildTree match {
-      case Left(error) => print(error)
+      case Left(error) => println(error)
       case Right(result1) =>
         // We check if the file that contains the commit message exists if not we create it and we write the message in it
         val pathFile = IO.buildPath(List(Repository.getRepositoryPath().getOrElse(""), nameFile))
@@ -213,7 +213,7 @@ object Commit {
     var list = List[String]()
     mapCommit.foreach(x => {
       var path = List[String]()
-      if (x._1.contains(".txt") || x._2.asInstanceOf[String].length == 40) {
+      if (x._1.contains(".txt") || (x._2.isInstanceOf[String] && x._2.asInstanceOf[String].length == 40)) {
         list = x._1 + " " + x._2 :: list
       } else {
         path = path ::: commitMapToListRec(x._2.asInstanceOf[Map[String, Any]]).getOrElse(List()).map(p => x._1 + File.separator + p)

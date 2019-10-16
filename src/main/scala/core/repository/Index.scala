@@ -27,10 +27,6 @@ object Index {
           val values = index1.map(x => x.head._1)
           index2 = listFiles.filterNot(x => values.contains(x.head._1))
             .map(x => Map(x.head._1 -> x.head._2))
-          /*listFiles.foreach(x => {
-            if (!values.contains(x.head._1))
-              index = Map(x.head._1 -> x.head._2) :: index
-          })*/
         }
         writeIndex(index1 ::: index2)
     }

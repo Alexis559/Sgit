@@ -41,11 +41,11 @@ object Object{
     val dirName = sha.substring(0, 2)
     val fileName = sha.substring(2)
     Repository.getPathToObject match {
+      case Left(error) => Left(error)
       case Right(result) =>
         IO.createDirectory(result, dirName)
         IO.createFile(IO.buildPath(List(result, dirName)), fileName, textContent)
         Right(null)
-      case Left(error) => Left(error)
     }
   }
 

@@ -19,18 +19,22 @@ object Tree{
         IO.readContentFile(result) match {
           case Left(error2) => Left(error2)
           case Right(result2) =>
-            // We split the content (sha and path) line by line
-            val lines = result2.map(x => x.split(" "))
-            // We split each path to get a list of the directories
-            val folders = lines.map(x => x(1).split(IO.getRegexFileSeparator).toList :+ x(0))
-            // We convert each list of path to a Map
-            val listMap = folders.map(x => SgitIO.listToMap(x.reverse))
-            // We merge each Map to get a unique Map representing the working directory of the project
-            val mergedListMap = SgitIO.mergeMaps(listMap)
-            // We create the files according to the Map
-            writeTree(Map(Repository.getRepoName.getOrElse("") -> mergedListMap)) match {
-              case Left(error) => Left(error)
-              case Right(result) => Right(result)
+            if (result2.isEmpty)
+              Left("Index empty.")
+            else {
+              // We split the content (sha and path) line by line
+              val lines = result2.map(x => x.split(" "))
+              // We split each path to get a list of the directories
+              val folders = lines.map(x => x(1).split(IO.getRegexFileSeparator).toList :+ x(0))
+              // We convert each list of path to a Map
+              val listMap = folders.map(x => SgitIO.listToMap(x.reverse))
+              // We merge each Map to get a unique Map representing the working directory of the project
+              val mergedListMap = SgitIO.mergeMaps(listMap)
+              // We create the files according to the Map
+              writeTree(Map(Repository.getRepoName.getOrElse("") -> mergedListMap)) match {
+                case Left(error) => Left(error)
+                case Right(result) => Right(result)
+              }
             }
         }
     }

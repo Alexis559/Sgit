@@ -137,6 +137,7 @@ object Status {
           case Right(indexCommit) => {
             val commitFlat = indexCommit.flatMap(x => x.split(" "))
             val indexKeys = indexMap.flatMap(x => x.keySet)
+            val indexValues = indexMap.map(x => x.head._2)
 
             filesDeleted = indexCommit
               .map(_.split(" ")(0))
@@ -145,7 +146,7 @@ object Status {
 
             filesModified = indexCommit
               .map(_.split(" "))
-              .filter(x => indexKeys.contains(x(0)) && !indexKeys.contains(x(1)))
+              .filter(x => indexKeys.contains(x(0)) && !indexValues.contains(x(1)))
               .map(y => Map(y(0) -> "modified"))
 
             filesAdded = indexMap

@@ -10,6 +10,7 @@ object Sgit extends App {
       case "commit" => CommitCmd.commit(config.commitName)
       case "status" => StatusCmd.status()
       case "tag" => TagCmd.tag(config.tagName)
+      case "diff" => DiffCmd.diff()
       case "test" => //Test.test() //println(Console.RED + "Ceci est un test couleur!") // TODO DELETE THIS AT THE END
       case _ => print(config)
     }
