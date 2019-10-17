@@ -3,12 +3,13 @@ package core.repository
 import java.io.File
 
 import utils.io.IO
+import utils.parser.Printer
 
 import scala.annotation.tailrec
 
 object Repository {
 
-  val listDir: Array[String] = Array(IO.buildPath(List("refs", "head")), IO.buildPath(List("refs", "tags")), "objects", "branches")
+  val listDir: Array[String] = Array(IO.buildPath(List("refs", "head")), IO.buildPath(List("refs", "tags")), "objects")
 
   /**
    * Function that initialize the .sgit repository.
@@ -54,7 +55,7 @@ object Repository {
   def isFileInRepo(filePath: String): Boolean = {
     getPathToParenSgit match {
       case Left(_) =>
-        println("File " + filePath + " is not in a Sgit repository !")
+        Printer.displayln("File " + filePath + " is not in a Sgit repository !")
         false
       case Right(result) =>
         if (filePath.contains(result) && new File(filePath).exists()) {
@@ -77,9 +78,10 @@ object Repository {
     val index = new File(IO.buildPath(List(file.getAbsolutePath, "index")))
     val head = new File(IO.buildPath(List(file.getAbsolutePath, "HEAD")))
     val objects = new File(IO.buildPath(List(file.getAbsolutePath, "objects")))
-    val refs = new File(IO.buildPath(List(file.getAbsolutePath, "refs")))
+    val refs = new File(IO.buildPath(List(file.getAbsolutePath, "refs", "head")))
+    val tag = new File(IO.buildPath(List(file.getAbsolutePath, "refs", "tags")))
 
-    if (file.exists() && index.exists() && head.exists() && objects.exists() && refs.exists()) {
+    if (file.exists() && index.exists() && head.exists() && objects.exists() && refs.exists() && tag.exists()) {
       Right(file.getAbsolutePath)
     } else if (file.getParent == "null" || file.getParent == null) {
       Left("This is not a Sgit repository. You should use 'sgit init'.\n")

@@ -66,13 +66,6 @@ class RepositoryTest extends FlatSpec with BeforeAndAfterEach {
     assert(file.exists() && file.isDirectory)
   }
 
-  it should "create branches directory in .sgit directory" in {
-    Repository.createRepository(tempDirPath)
-    val path = IO.buildPath(List(tempDirPath, repoDir, "branches"))
-    val file = new File(path)
-    assert(file.exists() && file.isDirectory)
-  }
-
   it should "create object directory in .sgit directory" in {
     Repository.createRepository(tempDirPath)
     val path = IO.buildPath(List(tempDirPath, repoDir, "objects"))

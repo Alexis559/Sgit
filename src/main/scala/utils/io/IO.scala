@@ -3,6 +3,7 @@ package utils.io
 import java.io.{File, FileWriter, PrintWriter}
 
 import core.repository.Repository
+import utils.parser.Printer
 
 import scala.io.Source
 
@@ -30,7 +31,7 @@ object IO {
       val file = new File(path)
       file.mkdirs()
     }else{
-      print("The directory '" + pathDir + "' doesn't exists !\n")
+      Printer.displayln("The directory '" + pathDir + "' doesn't exists !\n")
     }
   }
 
@@ -49,7 +50,7 @@ object IO {
       pw.write(contentToWrite)
       pw.close()
     }else{
-      print("The directory '" + pathFile + "' doesn't exists !\n")
+      Printer.displayln("The directory '" + pathFile + "' doesn't exists !\n")
     }
   }
 
@@ -166,6 +167,12 @@ object IO {
       "\\\\"
     else
       "/"
+  }
+
+  def deleteFile(pathFile: String): Unit = {
+    val file = new File(pathFile)
+    if (file.isFile && file.exists())
+      file.delete()
   }
 
   def deleteRecursively(file: File): Unit = {

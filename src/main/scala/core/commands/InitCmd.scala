@@ -3,6 +3,7 @@ package core.commands
 import java.io.File
 
 import core.repository.Repository
+import utils.parser.Printer
 
 object InitCmd {
 
@@ -16,7 +17,7 @@ object InitCmd {
       case Left(_) => Repository.createRepository(pathRepo)
       case Right(result) =>
         if (new File(result).getParent == pathRepo)
-          println("You are already in a Sgit repository !")
+          Printer.displayln("You are already in a Sgit repository !")
         else
           Repository.createRepository(pathRepo)
     }

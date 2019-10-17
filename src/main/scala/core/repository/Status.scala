@@ -4,6 +4,7 @@ import java.io.File
 
 import core.objects.{Branch, Commit, Object}
 import utils.io.{IO, SgitIO}
+import utils.parser.Printer
 
 object Status {
 
@@ -12,42 +13,42 @@ object Status {
    */
   def status(): Unit = {
     Branch.getCurrentBranch match {
-      case Left(error) => print(error)
+      case Left(error) => Printer.displayln(error)
       case Right(branch) =>
         getUntrackedFiles match {
-          case Left(error) => print(error)
+          case Left(error) => Printer.displayln(error)
           case Right(untracked) =>
             changesNotStaged match {
-              case Left(error) => print(error)
+              case Left(error) => Printer.displayln(error)
               case Right(notstaged) =>
                 Commit.isFirstCommit match {
-                  case Left(error) => print(error)
+                  case Left(error) => Printer.displayln(error)
                   case Right(first) =>
-                    println("On branch " + branch + "\n")
+                    Printer.displayln("On branch " + branch + "\n")
                     if (!first) {
                       // If it's not the first commit then we can get diff with the last commit
                       changesNotCommitted match {
-                        case Left(error) => print(error)
+                        case Left(error) => Printer.displayln(error)
                         case Right(notcommitted) =>
-                          println("\nChanges to be committed: ")
+                          Printer.displayln("\nChanges to be committed: ")
                           printMapStatus(notcommitted)
                       }
                     }
                     // If it's the first commit and the index is not empty then we display it's content
                     else if (first && IO.readContentFile(Repository.getPathToIndex.getOrElse("")).getOrElse(List()).nonEmpty) {
                       listNewFilesFirstCommit match {
-                        case Left(value) => println(value)
+                        case Left(value) => Printer.displayln(value)
                         case Right(value) =>
-                          println("\nChanges to be committed: ")
-                          println("\n" + listToStringStatus(value))
+                          Printer.displayln("\nChanges to be committed: ")
+                          Printer.displayln("\n" + listToStringStatus(value))
                       }
                     } else {
-                      println("\nNo commits yet\n")
+                      Printer.displayln("\nNo commits yet\n")
                     }
-                    println("\nChanges not staged for commit:\n  \t(use \"git add <file>...\" to update what will be committed)")
+                    Printer.displayln("\nChanges not staged for commit:\n  \t(use \"git add <file>...\" to update what will be committed)")
                     printMapStatus(notstaged)
-                    println("\nUntracked files:\n  \t(use \"git add <file>...\" to include in what will be committed)\n")
-                    println("\n" + listToStringStatus(untracked))
+                    Printer.displayln("\nUntracked files:\n  \t(use \"git add <file>...\" to include in what will be committed)\n")
+                    Printer.displayln("\n" + listToStringStatus(untracked))
                 }
             }
         }
@@ -164,8 +165,8 @@ object Status {
    * @param map the Map to print
    */
   def printMapStatus(map: List[Map[String, String]]): Unit = {
-    println("\n")
-    print(map.map(x => {
+    Printer.displayln("\n")
+    Printer.displayln(map.map(x => {
       ("\t" + x.head._2 + ": " + x.head._1 + "\n")
     }).mkString)
   }

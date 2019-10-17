@@ -5,6 +5,7 @@ import java.io.File
 import core.objects.Blob
 import core.repository.Repository
 import utils.io.{IO, SgitIO}
+import utils.parser.Printer
 
 object AddCmd {
   /**
@@ -14,17 +15,17 @@ object AddCmd {
    */
   def add(filesAdd: List[String]): Unit = {
     Repository.getRepositoryPath() match {
-      case Left(error) => print(error)
+      case Left(error) => Printer.displayln(error)
       case Right(result) =>
         if (filesAdd.isEmpty) {
-          println("Nothing specified, nothing added.\nMaybe you wanted to say 'sgit add .'?")
+          Printer.displayln("Nothing specified, nothing added.\nMaybe you wanted to say 'sgit add .'?")
         }
         else if (filesAdd.head == ".") {
           if (!IO.getCurrentPath.contains(result))
           // We add all the files recursively in the current directory and subdirectory
             Blob.treatBlob(SgitIO.listFiles())
           else
-            println("You can't do this action here.")
+            Printer.displayln("You can't do this action here.")
         } else {
           // We get the Canonical path to avoid relative paths
           val filesPathCanonical = filesAdd.map(x => new File(x).getCanonicalPath)

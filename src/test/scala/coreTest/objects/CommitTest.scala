@@ -14,11 +14,11 @@ class CommitTest extends FlatSpec with BeforeAndAfterEach {
   val textcontent = "testcontent"
 
   override def beforeEach(): Unit = {
-    Repository.createRepository(System.getProperty("user.dir"))
+    Repository.createRepository(currentPath)
   }
 
   override def afterEach(): Unit = {
-    IO.deleteRecursively(new File(IO.buildPath(List(System.getProperty("user.dir"), ".sgit"))))
+    IO.deleteRecursively(new File(IO.buildPath(List(currentPath, ".sgit"))))
   }
 
   /*it should "update the sha1 in the current Branch file" in {

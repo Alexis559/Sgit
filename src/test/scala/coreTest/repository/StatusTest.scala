@@ -85,13 +85,10 @@ class StatusTest extends FlatSpec with BeforeAndAfterEach {
 
     AddCmd.add(List(filename))
     val index = Index.getIndex.getOrElse(List())
-    println(index)
 
     val commit = Commit.getLastCommitIndex
-    println(commit)
 
     val list = Status.changesNotCommitted.getOrElse(List(Map()))
-    println(list)
     assert(list.head.head._2 == "deleted" && list.head.head._1 == filename2)
   }
 

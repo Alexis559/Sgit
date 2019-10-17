@@ -2,6 +2,7 @@ package core.objects
 
 import core.repository.{Index, Repository}
 import utils.io.IO
+import utils.parser.Printer
 
 import scala.math.max
 
@@ -12,10 +13,10 @@ object DiffAlgo {
    */
   def diffIndexWorking(): Unit = {
     Index.getIndex match {
-      case Left(error) => println(error)
+      case Left(error) => Printer.displayln(error)
       case Right(index) =>
         Repository.getPathToParenSgit match {
-          case Left(error) => println(error)
+          case Left(error) => Printer.displayln(error)
           case Right(path) =>
 
             val listDiff = index.flatten
@@ -136,9 +137,9 @@ object DiffAlgo {
   def printDiff(listDiff: List[Map[String, List[String]]]): Unit = {
     val list = listDiff.filter(x => x.head._2.nonEmpty)
     if (list.isEmpty)
-      println("No difference to display.")
+      Printer.displayln("No difference to display.")
     else {
-      println(IO.listToString(list.map(x => {
+      Printer.displayln(IO.listToString(list.map(x => {
         x.head._1 + "\n\n" + IO.listToString(x.head._2)
       })))
     }

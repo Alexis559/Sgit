@@ -2,6 +2,7 @@ package core.repository
 
 import core.objects.Object
 import utils.io.IO
+import utils.parser.Printer
 
 object Index {
 
@@ -12,7 +13,7 @@ object Index {
    */
   def updateIndex(listFiles: List[Map[String, String]] = null): Unit = {
     getIndex match {
-      case Left(error) => println(error)
+      case Left(error) => Printer.displayln(error)
       case Right(indexMap) =>
         var index1 = List[Map[String, String]]()
         var index2 = List[Map[String, String]]()
@@ -74,7 +75,7 @@ object Index {
       textContent + (x.head._2 + " " + x.head._1 + "\n")
     }))
     Repository.getPathToIndex match {
-      case Left(value) => print(value)
+      case Left(value) => Printer.displayln(value)
       case Right(value) =>
         IO.writeInFile(value, textContent, append = false)
     }

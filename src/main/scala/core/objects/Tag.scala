@@ -4,6 +4,7 @@ import java.io.File
 
 import core.repository.Repository
 import utils.io.{IO, SgitIO}
+import utils.parser.Printer
 
 object Tag {
 
@@ -14,16 +15,16 @@ object Tag {
    */
   def tag(tagName: String): Unit = {
     Commit.isFirstCommit match {
-      case Left(error) => print(error)
+      case Left(error) => Printer.displayln(error)
       case Right(first) =>
         if (first)
-          println("No commit to tag.")
+          Printer.displayln("No commit to tag.")
         else {
           Commit.getLastCommit match {
-            case Left(error) => print(error)
+            case Left(error) => Printer.displayln(error)
             case Right(shaCommit) =>
               Repository.getPathToRefTags match {
-                case Left(error) => print(error)
+                case Left(error) => Printer.displayln(error)
                 case Right(tagsPath) =>
                   IO.createFile(tagsPath, tagName, shaCommit)
               }
@@ -37,10 +38,10 @@ object Tag {
    */
   def listTag(): Unit = {
     Repository.getPathToRefTags match {
-      case Left(error) => print(error)
+      case Left(error) => Printer.displayln(error)
       case Right(tagsPath) =>
         val tags = SgitIO.listFiles(tagsPath)
-        println(IO.listToString(tags.map(x => new File(x).getName + "\n")))
+        Printer.displayln(IO.listToString(tags.map(x => new File(x).getName + "\n")))
     }
   }
 

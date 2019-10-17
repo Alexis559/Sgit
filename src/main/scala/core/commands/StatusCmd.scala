@@ -1,6 +1,7 @@
 package core.commands
 
 import core.repository.{Repository, Status}
+import utils.parser.Printer
 
 object StatusCmd {
 
@@ -9,7 +10,7 @@ object StatusCmd {
    */
   def status(): Unit = {
     Repository.getRepositoryPath() match {
-      case Left(error) => print(error)
+      case Left(error) => Printer.displayln(error)
       case Right(_) => Status.status()
     }
   }

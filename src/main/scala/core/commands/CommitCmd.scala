@@ -2,6 +2,7 @@ package core.commands
 
 import core.objects.Commit
 import core.repository.{Index, Repository}
+import utils.parser.Printer
 
 object CommitCmd {
   /**
@@ -11,7 +12,7 @@ object CommitCmd {
    */
   def commit(messageCommit: String): Unit = {
     Repository.getRepositoryPath() match {
-      case Left(error) => print(error)
+      case Left(error) => Printer.displayln(error)
       case Right(_) =>
         Index.getTrackedFiles
         Commit.commit(messageCommit)

@@ -4,6 +4,7 @@ import java.io.File
 
 import core.repository.Repository
 import utils.io.{IO, SgitIO}
+import utils.parser.Printer
 
 object Commit {
 
@@ -18,7 +19,7 @@ object Commit {
   def commit(messageCommit: String): Unit = {
     // We build the commit tree with the content of the index file
     Tree.buildTree match {
-      case Left(error) => println(error)
+      case Left(error) => Printer.displayln(error)
       case Right(result1) =>
         // We check if the file that contains the commit message exists if not we create it and we write the message in it
         val pathFile = IO.buildPath(List(Repository.getRepositoryPath().getOrElse(""), nameFile))
@@ -35,7 +36,7 @@ object Commit {
         // We get the sha1 of the last commit if there is one (nil if there's not) and we create a the commit file
         if (IO.fileExist(IO.buildPath(List(pathToRefHeads, currentBranch)))) {
           getLastCommit match {
-            case Left(error) => println(error)
+            case Left(error) => Printer.displayln(error)
             case Right(result2) =>
               commitContent = generateCommitContent(IO.listToString(result1), result2, messageCommit)
           }
@@ -50,7 +51,7 @@ object Commit {
 
         // We update the ref to the new commit tree
         updateCommitBranch(shaCommit) match {
-          case Left(error) => print(error)
+          case Left(error) => Printer.displayln(error)
           case Right(_) =>
         }
     }
@@ -158,15 +159,6 @@ object Commit {
               .map(x => x(2) -> commitToMap(x(1)).getOrElse(Map()))
               .toMap
 
-
-            /*contentCommit.foreach(x => {
-              val line = x.split(" ")
-              if (line(0) == "blob") {
-                listMap = listMap + (line(2) -> line(1))
-              } else if (line(0) == "tree") {
-                listMap = listMap + (line(2) -> commitToMap(line(1)).getOrElse(Map()))
-              }
-            })*/
             Right(listBlob ++ listTree)
         }
     }
@@ -222,4 +214,7 @@ object Commit {
     })
     Right(list)
   }
+
+  //def getListCommit:
+
 }
