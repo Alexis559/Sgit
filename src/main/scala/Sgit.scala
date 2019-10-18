@@ -1,5 +1,4 @@
 import core.commands._
-import core.objects.Checkout
 import utils.io.IO
 import utils.parser.Parser._
 import utils.parser.Printer
@@ -15,7 +14,8 @@ object Sgit extends App {
       case "diff" => DiffCmd.diff()
       case "branch" => if (config.verboseBranch) BranchCmd.branchList() else BranchCmd.branch(config.branchName)
       case "checkout" => CheckoutCmd.checkout(config.branchName)
-      case "test" => Printer.displayln(Checkout.recreateWorkingDirectory("test").toString) // TODO DELETE THIS AT THE END
+      case "log" => LogCmd.log()
+      case "test" => //Commit.printListCommit() // TODO DELETE THIS AT THE END
       case _ => Printer.displayln(config.toString)
     }
     case _ => Printer.displayln("No args given")

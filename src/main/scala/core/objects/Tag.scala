@@ -33,15 +33,26 @@ object Tag {
     }
   }
 
-  /**
-   * Function to list all the tags.
-   */
   def listTag(): Unit = {
-    Repository.getPathToRefTags match {
+    getTags match {
       case Left(error) => Printer.displayln(error)
+      case Right(value) =>
+        if (value.nonEmpty)
+          Printer.displayln(IO.listToString(value.map(x => x + "\n")))
+        else
+          Printer.displayln("No tag.")
+    }
+  }
+
+  /**
+   * Function to get all the tags.
+   */
+  def getTags: Either[String, List[String]] = {
+    Repository.getPathToRefTags match {
+      case Left(error) => Left(error)
       case Right(tagsPath) =>
         val tags = SgitIO.listFiles(tagsPath)
-        Printer.displayln(IO.listToString(tags.map(x => new File(x).getName + "\n")))
+        Right(tags.map(x => new File(x).getName))
     }
   }
 

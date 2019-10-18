@@ -215,6 +215,20 @@ object Commit {
     Right(list)
   }
 
-  //def getListCommit:
-
+  /**
+   * Function to get the content of a specific Commit.
+   *
+   * @param sha the sha of the Commit.
+   * @return Either left: error message, Either right: the Commit content.
+   */
+  def getCommit(sha: String): Either[String, List[String]] = {
+    Object.getObjectFilePath(sha) match {
+      case Left(error) => Left(error)
+      case Right(value) =>
+        IO.readContentFile(value) match {
+          case Left(error) => Left(error)
+          case Right(value) => Right(value)
+        }
+    }
+  }
 }
