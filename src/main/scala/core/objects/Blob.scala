@@ -1,28 +1,43 @@
 package core.objects
 
-import core.repository.Index
+import core.repository.Repository
 import utils.io.{IO, SgitIO}
 
-object Blob {
+// Blob used only for the add
+case class BlobFile(fileName: String, content: String) {
+  val sha: String = SgitIO.sha(content)
+}
 
+case class BlobIndex(fileName: String, sha: String)
+
+object Blob {
   /**
    * Function to get SHA-1 checksum for the files to create the folders and the files.
    *
-   * @param files path to the file we want to add
+   * @param repository Repository
+   * @param files      path to the file we want to add
+   * @return List of BlobIndex
    */
-  def treatBlob(files: List[String]): Unit = {
-    var filesToAdd = List[Map[String, String]]()
-
-    filesToAdd = files.filter(file => IO.readContentFile(file).isRight)
+  def treatBlob(repository: Repository, files: List[BlobFile]): List[BlobIndex] = {
+    val filesToAdd: List[BlobIndex] = files
       .map(x => {
-        val content = IO.listToString(IO.readContentFile(x).getOrElse(List()))
-        val shaContent = SgitIO.sha(content)
-        if (Object.createObject(shaContent, content).isRight)
-          Map(IO.cleanPathFile(x).getOrElse("") -> shaContent)
-        else
-          Map(IO.cleanPathFile(x).getOrElse("") -> "")
+        Object.createObject(repository, x.sha, x.content)
+        BlobIndex(IO.cleanPathFile(repository, x.fileName).getOrElse(""), x.sha)
       })
-
-    Index.updateIndex(filesToAdd)
+    filesToAdd
   }
+
+  /**
+   * Function to transform a file to a BlobFile
+   *
+   * @param file the file we want to transform
+   * @return Either left: error message, Either right: the BlobFile
+   */
+  def transformToBlobFile(file: String): Either[String, BlobFile] = {
+    IO.readContentFile(file) match {
+      case Left(error) => Left(error)
+      case Right(value) => Right(BlobFile(file, IO.listToString(value)))
+    }
+  }
+
 }

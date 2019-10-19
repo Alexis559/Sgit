@@ -1,183 +1,141 @@
 package core.repository
 
-import java.io.File
-
-import core.objects.{Branch, Commit, Object}
-import utils.io.{IO, SgitIO}
-import utils.parser.Printer
+import core.objects.{BlobIndex, Commit, Object}
+import utils.io.IO
 
 object Status {
 
   /**
    * Function to print the status of the repository.
+   *
+   * @param repository       Repository
+   * @param untrackedFiles   List of untracked files
+   * @param changesNotStaged List of changes not staged in a Map format
+   * @param index            Index in List of BlobIndex format
+   * @param commitMap        Index of last Commit in a Map format
+   * @return the Status of the Repository
    */
-  def status(): Unit = {
-    Branch.getCurrentBranch match {
-      case Left(error) => Printer.displayln(error)
-      case Right(branch) =>
-        getUntrackedFiles match {
-          case Left(error) => Printer.displayln(error)
-          case Right(untracked) =>
-            changesNotStaged match {
-              case Left(error) => Printer.displayln(error)
-              case Right(notstaged) =>
-                Commit.isFirstCommit match {
-                  case Left(error) => Printer.displayln(error)
-                  case Right(first) =>
-                    Printer.displayln("On branch " + branch + "\n")
-                    if (!first) {
-                      // If it's not the first commit then we can get diff with the last commit
-                      changesNotCommitted match {
-                        case Left(error) => Printer.displayln(error)
-                        case Right(notcommitted) =>
-                          Printer.displayln("\nChanges to be committed: ")
-                          printMapStatus(notcommitted)
-                      }
-                    }
-                    // If it's the first commit and the index is not empty then we display it's content
-                    else if (first && IO.readContentFile(Repository.getPathToIndex.getOrElse("")).getOrElse(List()).nonEmpty) {
-                      listNewFilesFirstCommit match {
-                        case Left(value) => Printer.displayln(value)
-                        case Right(value) =>
-                          Printer.displayln("\nChanges to be committed: ")
-                          Printer.displayln("\n" + listToStringStatus(value))
-                      }
-                    } else {
-                      Printer.displayln("\nNo commits yet\n")
-                    }
-                    Printer.displayln("\nChanges not staged for commit:\n  \t(use \"git add <file>...\" to update what will be committed)")
-                    printMapStatus(notstaged)
-                    Printer.displayln("\nUntracked files:\n  \t(use \"git add <file>...\" to include in what will be committed)\n")
-                    Printer.displayln("\n" + listToStringStatus(untracked))
-                }
-            }
-        }
+  def status(repository: Repository, untrackedFiles: List[String], changesNotStaged: List[Map[String, String]], index: List[BlobIndex], commitMap: Map[String, Any]): String = {
+    val commitList = Commit.commitToList(commitMap)
+    val changesNotCommitted = Status.changesNotCommitted(repository, index, commitList)
+    val newFilesFirsCommit = Status.listNewFilesFirstCommit(index)
+
+    var status = s"On branch ${repository.currentBranch.branchName}\n"
+
+    if (!Repository.isFirstCommit(repository)) {
+      // If it's not the first commit then we can get diff with the last commit
+      status += "\nChanges to be committed: \n" + printMapStatus(changesNotCommitted)
     }
+    // If it's the first commit and the index is not empty then we display it's content
+    else if (Repository.isFirstCommit(repository) && newFilesFirsCommit.nonEmpty) {
+      status += "\nChanges to be committed: " + "\n" + listToStringStatus(newFilesFirsCommit)
+    }
+    else {
+      status += "\nNo commits yet\n"
+    }
+    status += "\nChanges not staged for commit:\n  \t(use \"git add <file>...\" to update what will be committed)\n" + printMapStatus(changesNotStaged) + "\nUntracked files:\n  \t(use \"git add <file>...\" to include in what will be committed)\n" + "\n" + listToStringStatus(untrackedFiles)
+    status
+  }
+
+
+  /**
+   * Function to get the text to get the new files for the first Commit.
+   *
+   * @param index Index in List of BlobIndex format
+   * @return the Index in a List of String
+   */
+  def listNewFilesFirstCommit(index: List[BlobIndex]): List[String] = {
+    val text = index.map(x => "new file: " + x.fileName)
+    text
   }
 
   /**
-   * Function to get the text to print the untracked files.
+   * Function to get the difference with the index and the last Commit.
    *
-   * @return Either left: error message, Either right: the index in a List of String
+   * @param repository      Repository
+   * @param index           Index in List of BlobIndex format
+   * @param lastCommitIndex Index of last Commit in a List of String format
+   * @return the List of differences in a Map format
    */
-  def listNewFilesFirstCommit: Either[String, List[String]] = {
-    Index.getTrackedFiles match {
-      case Left(value) => Left(value)
-      case Right(value) =>
-        var text = List[String]()
-        text = value.map(x => "new file: " + x)
-        Right(text)
-    }
-  }
+  def changesNotCommitted(repository: Repository, index: List[BlobIndex], lastCommitIndex: List[String]): List[Map[String, String]] = {
+    val commitFlat = lastCommitIndex.flatMap(x => x.split(" "))
+    val indexKeys = index.map(_.fileName)
+    val indexValues = index.map(_.sha)
 
-  /**
-   * Function to get the list of untracked files.
-   *
-   * @return
-   */
-  def getUntrackedFiles: Either[String, List[String]] = {
-    Repository.getRepositoryPath() match {
-      case Left(error) => Left(error)
-      case Right(repoPath) =>
-        Index.getTrackedFiles match {
-          case Left(error) => Left(error)
-          case Right(indexFiles) =>
-            // We get all the files in the repository
-            var listFiles = SgitIO.listFiles(new File(repoPath).getParent)
-            listFiles = listFiles.map(IO.cleanPathFile(_).getOrElse(""))
-            // And we return only the ones who are not in the index
-            Right(listFiles.filterNot(indexFiles.toSet))
-        }
-    }
-  }
+    val filesDeleted: List[Map[String, String]] = lastCommitIndex
+      .map(_.split(" ")(0))
+      .filterNot(indexKeys.contains(_))
+      .map(x => Map(x -> "deleted"))
 
-  /**
-   * Function to get the list of changes in the repository.
-   *
-   * @return
-   */
-  def changesNotStaged: Either[String, List[Map[String, String]]] = {
-    Index.getIndex match {
-      case Left(error) => Left(error)
-      case Right(indexMap) =>
-        // List of files that exists
-        val filesExisting = indexMap.filter(file => Repository.isFileInRepo(file.head._1))
-        // List of files that doesn't exist anymore
-        val filesDeleted = indexMap.filterNot(file => Repository.isFileInRepo(file.head._1))
+    val filesModified: List[Map[String, String]] = lastCommitIndex
+      .map(_.split(" "))
+      .filter(x => indexKeys.contains(x(0)) && !indexValues.contains(x(1)))
+      .map(y => Map(y(0) -> "modified"))
 
-        var mapFilesDeleted = List[Map[String, String]]()
-        var mapFilesModified = List[Map[String, String]]()
+    val filesAdded: List[Map[String, String]] = indexKeys
+      .filterNot(x => commitFlat.contains(x))
+      .map(y => Map(y -> "added"))
 
-        mapFilesDeleted = filesDeleted.map(x => {
-          Map(x.head._1 -> "deleted")
-        })
-
-        val pathRepo = Repository.getRepositoryPath().getOrElse("")
-
-        mapFilesModified = filesExisting.filter(x => (Object.returnNewSha(IO.buildPath(List(pathRepo.replace(Repository.getSgitName, ""), x.head._1))).getOrElse("") != x.head._2))
-          .map(x => Map(x.head._1 -> "modified"))
-
-        Right(mapFilesDeleted ::: mapFilesModified)
-    }
-  }
-
-  /**
-   * Function to get the difference with the index and the last commit.
-   *
-   * @return Either left: error message, Either right: the difference in a List of Map
-   */
-  def changesNotCommitted: Either[String, List[Map[String, String]]] = {
-    Index.getIndex match {
-      case Left(error) => Left(error)
-      case Right(indexMap) =>
-        var filesDeleted = List[Map[String, String]]()
-        var filesModified = List[Map[String, String]]()
-        var filesAdded = List[Map[String, String]]()
-        Commit.getLastCommitIndex match {
-          case Left(error) => Left(error)
-          case Right(indexCommit) => {
-            val commitFlat = indexCommit.flatMap(x => x.split(" "))
-            val indexKeys = indexMap.flatMap(x => x.keySet)
-            val indexValues = indexMap.map(x => x.head._2)
-
-            filesDeleted = indexCommit
-              .map(_.split(" ")(0))
-              .filterNot(indexKeys.contains(_))
-              .map(x => Map(x -> "deleted"))
-
-            filesModified = indexCommit
-              .map(_.split(" "))
-              .filter(x => indexKeys.contains(x(0)) && !indexValues.contains(x(1)))
-              .map(y => Map(y(0) -> "modified"))
-
-            filesAdded = indexMap
-              .filterNot(x => commitFlat.contains(x.head._1))
-              .map(y => Map(y.head._1 -> "added"))
-          }
-            Right(filesDeleted ::: filesModified ::: filesAdded)
-        }
-    }
+    filesDeleted ::: filesModified ::: filesAdded
   }
 
   /**
    * Function to print a Map.
    *
-   * @param map the Map to print
+   * @param map a List of Map to print
+   * @return the List of Map in a String format
    */
-  def printMapStatus(map: List[Map[String, String]]): Unit = {
-    Printer.displayln("\n")
-    Printer.displayln(map.map(x => {
-      ("\t" + x.head._2 + ": " + x.head._1 + "\n")
-    }).mkString)
+  def printMapStatus(map: List[Map[String, String]]): String = {
+    val status = "\n " + map.map(x => {
+      "\t" + x.head._2 + ": " + x.head._1 + "\n"
+    }).mkString
+    status
   }
 
   /**
-   * Function to convert a List to a String
+   * Function to convert a List to a String.
    *
    * @param list the List to convert in String format
    * @return the List in String format
    */
   def listToStringStatus(list: List[String]): String = {
     list.map(x => "\t" + x + "\n").mkString
+  }
+
+  /**
+   * Function to get the list of untracked files.
+   *
+   * @param repository    Repository
+   * @param trackedFiles  list of tracked files in a List format
+   * @param listFilesRepo list of all the files in the working directory
+   * @return List of untracked files
+   */
+  def getUntrackedFiles(repository: Repository, trackedFiles: List[String], listFilesRepo: List[String]): List[String] = {
+    val listFiles = listFilesRepo.map(IO.cleanPathFile(repository, _).getOrElse(""))
+    // And we return only the ones who are not in the index
+    listFiles.filterNot(trackedFiles.toSet)
+  }
+
+  /**
+   * Function to get the list of changes in the repository.
+   *
+   * @param repository   Repository
+   * @param trackedFiles list of tracked files in a List format
+   * @return the List of changes in a Map format
+   */
+  def changesNotStaged(repository: Repository, trackedFiles: List[BlobIndex]): List[Map[String, String]] = {
+    // List of files that exists
+    val filesExisting = trackedFiles.filter(file => Repository.isFileInRepo(repository, file.fileName))
+    // List of files that doesn't exist anymore
+    val filesDeleted = trackedFiles.filterNot(file => Repository.isFileInRepo(repository, file.fileName))
+
+    val mapFilesDeleted = filesDeleted.map(x => {
+      Map(x.fileName -> "deleted")
+    })
+
+    val mapFilesModified = filesExisting.filter(x => (Object.returnNewSha(Repository.getPathInRepo(repository, x.fileName))).getOrElse("") != x.sha)
+      .map(x => Map(x.fileName -> "modified"))
+
+    mapFilesDeleted ::: mapFilesModified
   }
 }

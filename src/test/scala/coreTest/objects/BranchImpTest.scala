@@ -8,7 +8,7 @@ import core.repository.{ImpureRepository, Repository}
 import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 import utils.io.IO
 
-class CommitTest extends FlatSpec with BeforeAndAfterEach {
+class BranchImpTest extends FlatSpec with BeforeAndAfterEach {
 
   val currentPath: String = System.getProperty("user.dir")
   val filename = "filetest.txt"
@@ -25,4 +25,9 @@ class CommitTest extends FlatSpec with BeforeAndAfterEach {
   override def afterEach(): Unit = {
     IO.deleteRecursively(new File(repoDir))
   }
+
+  it should "return the current Branch name" in {
+    assert(repository.currentBranch.branchName == "master")
+  }
+
 }

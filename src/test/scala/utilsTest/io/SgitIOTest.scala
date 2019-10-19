@@ -1,8 +1,9 @@
 package utilsTest.io
 
 import java.io.File
+import java.nio.file.Files
 
-import core.repository.Repository
+import core.repository.ImpureRepository
 import org.scalatest.FlatSpec
 import utils.io.{IO, SgitIO}
 
@@ -41,18 +42,26 @@ class SgitIOTest extends FlatSpec {
   }
 
   it should "return the list of files" in {
-    Repository.createRepository(System.getProperty("user.dir"))
-    val seq = List("HEAD", "description", "index")
-    val files = SgitIO.listFilesRec(new File(IO.buildPath(List(".sgit")))).map(_.getName)
+    val repoDir = Files.createTempDirectory("RepoTestSgit").toString
 
-    assert(seq.toSeq.sorted == files.toSeq.sorted)
+    ImpureRepository.createRepository(repoDir)
+    val repository = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
+
+    val seq = List("HEAD", "description", "index", "master")
+    val files = SgitIO.listFilesRec(new File(IO.buildPath(List(repoDir, ".sgit")))).map(_.getName)
+
+    assert(seq.sorted == files.sorted)
   }
 
   it should "return an empty list of files" in {
-    Repository.createRepository(System.getProperty("user.dir"))
-    val files = SgitIO.listFilesRec(new File(IO.buildPath(List(".sgit", "refs")))).map(_.getName)
+    val repoDir = Files.createTempDirectory("RepoTestSgit").toString
+
+    ImpureRepository.createRepository(repoDir)
+    val repository = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
+    val files = SgitIO.listFilesRec(new File(IO.buildPath(List(repoDir, ".sgit", "refs", "tags")))).map(_.getName)
 
     assert(files.isEmpty)
+    IO.deleteRecursively(new File(repoDir))
   }
 
 }

@@ -2,100 +2,91 @@ package core.objects
 
 import java.io.File
 
-import core.repository.{Index, Repository, Status}
+import core.repository.Repository
 import utils.io.IO
-import utils.parser.Printer
 
 object Checkout {
-  def checkout(branchName: String): Unit = {
-    if (!Branch.branchExists(branchName))
-      Printer.displayln(s"Branch $branchName doesn't exist.")
-    else {
-      verifChanges match {
-        case Left(value) => Printer.displayln(value)
-        case Right(value) =>
-          if (value) {
-            updateHead(branchName) match {
-              case Left(error) => Printer.displayln(error)
-              case Right(value) =>
-                deleteWorkingDirectory() match {
-                  case Left(error) => Printer.displayln(error)
-                  case Right(value) =>
-                    if (value)
-                      recreateWorkingDirectory(branchName)
-                }
 
-            }
-          }
+  /**
+   * Function to change of Branch.
+   *
+   * @param repository          Repository
+   * @param branchName          the Branch name
+   * @param changesNotStaged    the List of changes not staged
+   * @param changesNotCommitted the List of changes not committed
+   * @param index               the Index in List of BlobIndex format
+   * @param commitMap           Commit Index in a Map format
+   * @return message in String format
+   */
+  def checkout(repository: Repository, branchName: String, changesNotStaged: List[Map[String, String]], changesNotCommitted: List[Map[String, String]], index: List[BlobIndex], commitMap: Map[String, Any]): String = {
+    val verif = verifChanges(changesNotStaged, changesNotCommitted)
+    if (verif._1) {
+      updateHead(repository, branchName)
+      deleteWorkingDirectory(repository, index)
+      recreateWorkingDirectory(repository, branchName, commitMap)
+      s"Moved to $branchName."
       }
+    else
+      verif._2
+  }
+
+  /**
+   * Function to check if the Stage is updated.
+   *
+   * @param changesNotStaged    List of changes not staged
+   * @param changesNotCommitted List of changes not committed
+   * @return Tuple(true if Stage is updated else alse, message in String format)
+   */
+  def verifChanges(changesNotStaged: List[Map[String, String]], changesNotCommitted: List[Map[String, String]]): (Boolean, String) = {
+    if (changesNotStaged.isEmpty) {
+      if (changesNotCommitted.isEmpty)
+        (true, "")
+      else
+        (false, "You need to commit the changes.")
+
+    } else {
+      (false, "You need to stage the changes.")
     }
   }
 
-  def verifChanges: Either[String, Boolean] = {
-    Status.changesNotStaged match {
-      case Left(error) => Left(error)
-      case Right(value) =>
-        if (value.isEmpty) {
-          Status.changesNotCommitted match {
-            case Left(value) => Left(value)
-            case Right(value) =>
-              if (value.isEmpty)
-                Right(true)
-              else {
-                Printer.displayln("You need to commit the changes.")
-                Right(false)
-              }
-          }
-        } else {
-          Printer.displayln("You need to stage the changes.")
-          Right(false)
+  /**
+   * Function to update the HEAD file.
+   *
+   * @param repository Repository
+   * @param branchName the Branch name
+   */
+  def updateHead(repository: Repository, branchName: String): Unit = {
+    IO.writeInFile(Repository.pathToHead(repository), "ref: " + IO.buildPath(List("refs", "head", branchName)), false)
+  }
+
+  /**
+   * Function to delete the files from the working directory.
+   *
+   * @param repository Repository
+   * @param index      the Index in List of BlobIndex format
+   */
+  def deleteWorkingDirectory(repository: Repository, index: List[BlobIndex]): Unit = {
+    index.foreach(x => IO.deleteFile(x.fileName))
+    IO.writeInFile(Repository.pathToIndex(repository), "", false)
+  }
+
+  /**
+   * Function to re-create the files from the index of a Commit.
+   *
+   * @param repository Repository
+   * @param branchName the Branch name
+   * @param commitMap  Commit Index in a Map format
+   */
+  def recreateWorkingDirectory(repository: Repository, branchName: String, commitMap: Map[String, Any]): Unit = {
+    val commit = Commit.commitToList(commitMap)
+    commit.map(_.split(" "))
+      .foreach(x => {
+        val pathRepo = Repository.getRepoPath(repository)
+        if (x(0).contains(File.separator)) {
+          IO.createDirectory(pathRepo, x(0).substring(0, x(0).lastIndexOf(File.separator)))
         }
-    }
-  }
-
-  def updateHead(branchName: String): Either[String, Boolean] = {
-    Repository.getPathToHead match {
-      case Left(error) => Left(error)
-      case Right(value) =>
-        IO.writeInFile(value, "ref: " + IO.buildPath(List("refs", "head", "master", branchName)), false)
-        Right(true)
-    }
-  }
-
-  def deleteWorkingDirectory(): Either[String, Boolean] = {
-    Index.getIndex match {
-      case Left(error) => Left(error)
-      case Right(index) =>
-        index.map(x => IO.deleteFile(x.head._1))
-        Repository.getPathToIndex match {
-          case Left(error) => Left(error)
-          case Right(value) =>
-            IO.writeInFile(value, "", false)
-        }
-        Right(true)
-    }
-  }
-
-  def recreateWorkingDirectory(branchName: String): Either[String, Boolean] = {
-    Branch.getBranchCommit(branchName) match {
-      case Left(error) => Left(error)
-      case Right(value) =>
-        Commit.commitToList(value) match {
-          case Left(error) => Left(error)
-          case Right(commit) =>
-            commit.map(_.split(" "))
-              .map(x => x(0).substring(Repository.getRepoName.getOrElse("").length + 1) + " " + x(1))
-              .map(_.split(" "))
-              .foreach(x => {
-                val pathRepo = Repository.getPathToParenSgit.getOrElse("")
-                if (x(0).contains(File.separator)) {
-                  IO.createDirectory(Repository.getPathToParenSgit.getOrElse(""), x(0).substring(0, x(0).lastIndexOf(File.separator)))
-                }
-                IO.createFile(pathRepo, x(0).split(IO.getRegexFileSeparator).last, IO.listToString(IO.readContentFile(Object.getObjectFilePath(x(1)).getOrElse("")).getOrElse(List())))
-                IO.writeInFile(Repository.getPathToIndex.getOrElse(""), x(1) + " " + x(0), true)
-              })
-            Right(false)
-        }
-    }
+        IO.createFile(pathRepo, x(0).split(IO.getRegexFileSeparator).last, IO.listToString(IO.readContentFile(Object.getObjectFilePath(repository, x(1))).getOrElse(List())))
+        IO.writeInFile(Repository.pathToIndex(repository), x(1) + " " + x(0), true)
+      })
   }
 }

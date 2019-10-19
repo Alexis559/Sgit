@@ -4,8 +4,6 @@ import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
 
-import core.repository.Repository
-
 import scala.annotation.tailrec
 
 object SgitIO {
@@ -101,7 +99,6 @@ object SgitIO {
     result ++
       files
         .filter(_.isDirectory)
-        .filter(!_.getPath.contains(Repository.getRepositoryPath().getOrElse("")))
         .filter(_ => recursive)
         .flatMap(listFilesRec(_, recursive))
   }

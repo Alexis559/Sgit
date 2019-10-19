@@ -1,8 +1,7 @@
 package core.objects
 
-import core.repository.{Index, Repository}
+import core.repository.Repository
 import utils.io.IO
-import utils.parser.Printer
 
 import scala.math.max
 
@@ -10,41 +9,26 @@ object DiffAlgo {
 
   /**
    * Function to compute the difference between all the files in the index and in the working directory.
+   *
+   * @param repository Repository
+   * @param index      Index in List of BlobIndex format
+   * @return message in String format
    */
-  def diffIndexWorking(): Unit = {
-    Index.getIndex match {
-      case Left(error) => Printer.displayln(error)
-      case Right(index) =>
-        Repository.getPathToParenSgit match {
-          case Left(error) => Printer.displayln(error)
-          case Right(path) =>
-
-            val listDiff = index.flatten
-              .map(x => Map(x._1 -> diffFiles(x._1, Object.getObjectFilePath(x._2).getOrElse("")).getOrElse(List())))
-
-            printDiff(listDiff)
-
-        }
-    }
+  def diffIndexWorking(repository: Repository, index: List[BlobIndex]): String = {
+    val listDiff = index.map(x => Map(x.fileName -> diffFiles(IO.readContentFile(x.fileName).getOrElse(List()), IO.readContentFile(Object.getObjectFilePath(repository, x.sha)).getOrElse(List()))))
+    printDiff(listDiff)
   }
 
   /**
    * Function to compute the difference between two files.
    *
-   * @param fileNew the path to the new file
-   * @param fileOld the path to the old file
-   * @return Either left: error message, Either right: the list of differences between the two files
+   * @param contentNewFile content of new file
+   * @param contentOldFile content of old file
+   * @return the List of differences between the two files
    */
-  def diffFiles(fileNew: String, fileOld: String): Either[String, List[String]] = {
-    IO.readContentFile(fileOld) match {
-      case Left(error) => Left(error)
-      case Right(contentOldFile) => {
-        // If the file doesn't exist anymore we can return an empty list
-        val contentNewFile = IO.readContentFile(fileNew).getOrElse(List())
-        val matrix = createMatrix(contentNewFile, contentOldFile)
-        Right(LCSAlgo(matrix, contentNewFile, contentOldFile))
-      }
-    }
+  def diffFiles(contentNewFile: List[String], contentOldFile: List[String]): List[String] = {
+    val matrix = createMatrix(contentNewFile, contentOldFile)
+    LCSAlgo(matrix, contentNewFile, contentOldFile)
   }
 
 
@@ -133,15 +117,16 @@ object DiffAlgo {
    * Function to print the differences.
    *
    * @param listDiff list of differences
+   * @return message in String format
    */
-  def printDiff(listDiff: List[Map[String, List[String]]]): Unit = {
+  def printDiff(listDiff: List[Map[String, List[String]]]): String = {
     val list = listDiff.filter(x => x.head._2.nonEmpty)
     if (list.isEmpty)
-      Printer.displayln("No difference to display.")
+      "No difference to display."
     else {
-      Printer.displayln(IO.listToString(list.map(x => {
-        x.head._1 + "\n\n" + IO.listToString(x.head._2)
-      })))
+      IO.listToString(list.map(x => {
+        x.head._1 + "\n" + IO.listToString(x.head._2) + "\n\n"
+      }))
     }
   }
 }
