@@ -11,6 +11,11 @@ addons:
     token:
       secure: "s+GKGxzAolaQV8BrHnxpwH4EQgj7uVOF8QjgCuvGZ0ZRYL5GikDkhd99wv1xXMRns6cne88GJcBSRQAIphpaoTYwlxegtk5LYy1t3Zh8kgIKaysLKUWvzvsCX7bl217uu7kqw39VVM05xrh6yXloCuVzPwKHhDoWDarApOM+lTuASXGavv98uLzcMKqCM2z/axNg1KvECRLDfWgevNvg6tzRt6kiM7vTlP5pp+pmM+sd35UDBzNgurnyIwbtV95SD8KWWj4drs9qbR+XB4pYDtBq0Nu86Ytn5/UgPrbagSdLsyi0ZiljWU0EzFLd8qDueAmlaXdy5wOYzIPg/E+PVuh+sMjk04sEPx3ACYy18oJth1gOu/EMH+7JdK808BxV+f2wfGaKM2QBBi8rQOybpJ0ElDQLEWygyCU1PF5X6HkQwq5vcJCoISJA1v5O1nJWfFvU/WsUDN+3PgddM+q39pQSVzlhGtLz9rR8pUXbvvn+Bvug32QL007uhh4RzzKvlencvh9mcRmSKj4M8ot553oITP7NbRwBKudscPoZCHCet5kuZta92a/hUMjfJu9iCPB9gO04O/E/6Jo8JtzKZBnv5HyS6od8b+fuunHXxRUqRK+QrkMX4OVLvrqmkxVx3Be6BptEqvuzSvRrJ+bXuAq/78/oryIC/x6rVN89Iiw="
 
-script:
-- sbt assembly
-- sonar-scanner
+jobs:
+  include:
+    - stage: test
+      script: sbt test
+    - stage: sonarcloud
+      script:
+        - sbt coverage test coverageReport
+        - sonar-scanner
