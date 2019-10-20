@@ -134,7 +134,7 @@ object IO {
       val pattern = "." + File.separator
       if (path.startsWith(pattern))
         path = path.replace("." + File.separator, "")
-      if (path.startsWith("."))
+      if (!file.getName.startsWith(".") && path.startsWith("."))
         path = path.replaceFirst(".", "")
       Right(path)
     } else {

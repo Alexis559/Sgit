@@ -41,7 +41,7 @@ object AddCmd {
           // We get the Canonical path to avoid relative paths
           if (filesAdd.nonEmpty) {
             val pathCano = filesAdd.map(new File(_).getCanonicalPath)
-            val blobs: List[BlobFile] = pathCano.filter(x => Repository.isFileInRepo(repository, x) && new File(x).isFile).map(Blob.transformToBlobFile(_).getOrElse(null))
+            val blobs: List[BlobFile] = pathCano.filter(x => Repository.isFileInRepo(repository, x) && new File(x).isFile && !x.contains(repository.pathRepo)).map(Blob.transformToBlobFile(_).getOrElse(null))
             if (blobs.nonEmpty) {
               val blobFiles: List[BlobIndex] = Blob.treatBlob(repository, blobs)
               val indexUpdated = Index.addFilesToIndex(newIndex, blobFiles)

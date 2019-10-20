@@ -31,7 +31,10 @@ object Branch {
     repository.commit match {
       case Left(error) => Left(error)
       case Right(value) =>
-        IO.createFile(Repository.pathToRefsHead(repository), branchName, value.sha)
+        if (value == null)
+          IO.createFile(Repository.pathToRefsHead(repository), branchName, "nil")
+        else
+          IO.createFile(Repository.pathToRefsHead(repository), branchName, value.sha)
         Right(s"Branch $branchName created.")
     }
   }

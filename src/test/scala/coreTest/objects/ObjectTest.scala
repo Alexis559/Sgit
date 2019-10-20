@@ -15,7 +15,7 @@ class ObjectTest extends FlatSpec with BeforeAndAfterEach {
   val filename = "filetest.txt"
   val textcontent = "testcontent"
   var repoDir: String = ""
-  var repository: Repository = null
+  var repository: Repository = _
 
   override def beforeEach(): Unit = {
     repoDir = Files.createTempDirectory("RepoTestSgit").toString
@@ -40,5 +40,14 @@ class ObjectTest extends FlatSpec with BeforeAndAfterEach {
       }
     else
       assert(false)
+  }
+
+  it should "return the new sha" in {
+    val sha = SgitIO.sha(textcontent)
+    IO.createFile(repoDir, filename, textcontent)
+
+    IO.writeInFile(IO.buildPath(List(repoDir, filename)), "tt", false)
+
+    assert(Object.returnNewSha(IO.buildPath(List(repoDir, filename))).getOrElse(sha) != sha)
   }
 }

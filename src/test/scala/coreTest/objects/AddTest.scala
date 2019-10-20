@@ -13,7 +13,7 @@ class AddTest extends FlatSpec with BeforeAndAfterEach {
   val filename = "filetest.txt"
   val textcontent = "testcontent"
   var repoDir: String = ""
-  var repository: Repository = null
+  var repository: Repository = _
 
   override def beforeEach(): Unit = {
     repoDir = Files.createTempDirectory("RepoTestSgit").toString
@@ -52,6 +52,29 @@ class AddTest extends FlatSpec with BeforeAndAfterEach {
       case Left(_) => assert(false)
       case Right(result) =>
         assert(IO.listToString(result).contains(sha))
+    }
+  }
+
+  it should "return an error when adding a file from .sgit" in {
+    IO.createFile(Repository.getPathSgit(repository), filename, textcontent)
+    AddCmd.add(repository, List(IO.buildPath(List(Repository.getPathSgit(repository), filename))))
+
+    val newRepository = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
+    newRepository.index match {
+      case Left(value) => assert(false)
+      case Right(value) =>
+        assert(value.isEmpty)
+    }
+  }
+
+  it should "return an error when adding a file that doesn't exist" in {
+    val text = AddCmd.add(repository, List(IO.buildPath(List(Repository.getPathSgit(repository), filename))))
+
+    val newRepository = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
+    newRepository.index match {
+      case Left(value) => assert(false)
+      case Right(value) =>
+        assert(value.isEmpty && text == "File(s) not valid.")
     }
   }
 }

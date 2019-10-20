@@ -15,7 +15,7 @@ object DiffAlgo {
    * @return message in String format
    */
   def diffIndexWorking(repository: Repository, index: List[BlobIndex]): String = {
-    val listDiff = index.map(x => Map(x.fileName -> diffFiles(IO.readContentFile(x.fileName).getOrElse(List()), IO.readContentFile(Object.getObjectFilePath(repository, x.sha)).getOrElse(List()))))
+    val listDiff = index.map(x => Map(x.fileName -> diffFiles(IO.readContentFile(Repository.getPathInRepo(repository, x.fileName)).getOrElse(List()), IO.readContentFile(Object.getObjectFilePath(repository, x.sha)).getOrElse(List()))))
     printDiff(listDiff)
   }
 

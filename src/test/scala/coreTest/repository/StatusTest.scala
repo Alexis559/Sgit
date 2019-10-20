@@ -16,7 +16,7 @@ class StatusTest extends FlatSpec with BeforeAndAfterEach {
   val filename3 = "filetest3"
   val textcontent = "testcontent"
   var repoDir: String = ""
-  var repository: Repository = null
+  var repository: Repository = _
 
   override def beforeEach(): Unit = {
     repoDir = Files.createTempDirectory("RepoTestSgit").toString

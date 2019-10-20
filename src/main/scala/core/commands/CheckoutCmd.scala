@@ -27,17 +27,24 @@ object CheckoutCmd {
           repository.commit match {
             case Left(error) => error
             case Right(value) =>
-              Commit.commitToMap(repository, value.sha) match {
-                case Left(error) => error
-                case Right(commitMap) =>
-                  val indexLastCommit = Commit.commitToList(commitMap)
-                  val changesNotCommitted = Status.changesNotCommitted(repository, index, indexLastCommit)
-                  val shaCommitBranch = Branch.getBranchCommit(repository, branchName).commit
-                  Commit.commitToMap(repository, shaCommitBranch) match {
-                    case Left(error) => error
-                    case Right(commitBranchMap) =>
-                      Checkout.checkout(repository, branchName, changesNotStaged, changesNotCommitted, index, commitBranchMap)
-                  }
+              // Check for the last Commit
+              if (value != null) {
+                Commit.commitToMap(repository, value.sha) match {
+                  case Left(error) => error
+                  case Right(commitMap) =>
+                    val indexLastCommit = Commit.commitToList(commitMap)
+                    val changesNotCommitted = Status.changesNotCommitted(repository, index, indexLastCommit)
+                    val shaCommitBranch = Branch.getBranchCommit(repository, branchName).commit
+                    Commit.commitToMap(repository, shaCommitBranch) match {
+                      case Left(error) => error
+                      case Right(commitBranchMap) =>
+                        Checkout.checkout(repository, branchName, changesNotStaged, changesNotCommitted, index, commitBranchMap)
+                    }
+                }
+              } else {
+                // There was no Commit before
+                val changesNotCommitted = Status.changesNotCommitted(repository, index, List())
+                Checkout.checkout(repository, branchName, changesNotStaged, changesNotCommitted, index, Map())
               }
           }
       }
