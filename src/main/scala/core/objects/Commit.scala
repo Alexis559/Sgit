@@ -190,5 +190,4 @@ object Commit {
       }
     }
   }
-
 }

@@ -1,6 +1,7 @@
 package core.objects
 
 import core.repository.Repository
+import core.objects.Commit
 
 object Log {
 

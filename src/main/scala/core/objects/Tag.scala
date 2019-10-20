@@ -20,6 +20,17 @@ object Tag {
     s"Tag $tagName created.\n$tagName -> $shaCommit"
   }
 
+  def listTag(): Unit = {
+    getTags match {
+      case Left(error) => Printer.displayln(error)
+      case Right(value) =>
+        if (value.nonEmpty)
+          Printer.displayln(IO.listToString(value.map(x => x + "\n")))
+        else
+          Printer.displayln("No tag.")
+    }
+  }
+
   /**
    * Function to know a Tag already exists.
    *
