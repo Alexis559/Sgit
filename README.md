@@ -17,7 +17,7 @@ Local Changes:
 - sgit status
 - sgit diff
 - sgit add <filename/filenames or . or regexp>
-- git commit
+- sgit commit
 
 Commit History:
 - sgit log
