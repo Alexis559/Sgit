@@ -2,8 +2,7 @@ package core.commands
 
 import java.io.File
 
-import core.repository.Repository
-import utils.parser.Printer
+import core.repository.ImpureRepository
 
 object InitCmd {
 
@@ -12,14 +11,18 @@ object InitCmd {
    *
    * @param pathRepo path where to create the repository
    */
-  def init(pathRepo: String): Unit = {
-    Repository.getRepositoryPath() match {
-      case Left(_) => Repository.createRepository(pathRepo)
+  def init(pathRepo: String): String = {
+    ImpureRepository.getRepositoryPath() match {
+      case Left(_) =>
+        ImpureRepository.createRepository(pathRepo)
+        s"Repository $pathRepo created."
       case Right(result) =>
         if (new File(result).getParent == pathRepo)
-          Printer.displayln("You are already in a Sgit repository !")
-        else
-          Repository.createRepository(pathRepo)
+          "You are already in a Sgit repository !"
+        else {
+          ImpureRepository.createRepository(pathRepo)
+          s"Repository $pathRepo created."
+        }
     }
   }
 }

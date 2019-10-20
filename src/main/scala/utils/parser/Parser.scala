@@ -118,17 +118,6 @@ object Parser {
                 .text("Branch name or commit hash.")
             )
         )
-
-
-      /**
-       * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! A SUPPRIMER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       */
-      // TODO DELETE THIS AT THE END
-      cmd("test")
-        .action((_, c) => c.copy(mode = "test"))
-        .text("test funct")
-
-
     }
   }
 

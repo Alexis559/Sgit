@@ -4,8 +4,6 @@ import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
 
-import core.repository.Repository
-
 import scala.annotation.tailrec
 
 object SgitIO {
@@ -83,6 +81,12 @@ object SgitIO {
     keySet.map(key => key -> mergeMap(nodeForKey(map1, key), nodeForKey(map2, key))).toMap
   }
 
+  /**
+   * Function to list all the files in a directory.
+   *
+   * @param pathFile the path of the Directory
+   * @return List of String
+   */
   def listFiles(pathFile: String = System.getProperty("user.dir")): List[String] = {
     val files = listFilesRec(new File(pathFile)).toList
     files.map(_.getPath)
@@ -101,7 +105,6 @@ object SgitIO {
     result ++
       files
         .filter(_.isDirectory)
-        .filter(!_.getPath.contains(Repository.getRepositoryPath().getOrElse("")))
         .filter(_ => recursive)
         .flatMap(listFilesRec(_, recursive))
   }

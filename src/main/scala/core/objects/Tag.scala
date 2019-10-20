@@ -1,59 +1,33 @@
 package core.objects
 
-import java.io.File
-
 import core.repository.Repository
-import utils.io.{IO, SgitIO}
-import utils.parser.Printer
+import utils.io.IO
+
+case class Tag(tagName: String, commit: String)
 
 object Tag {
 
   /**
-   * Function to create a tag.
+   * Function to create a Tag.
    *
-   * @param tagName the tag name
+   * @param tagsPath  path to the refs/tags
+   * @param tagName   the Tag name
+   * @param shaCommit the sha of the Commit where the Tag will refer to
+   * @return message in String format
    */
-  def tag(tagName: String): Unit = {
-    Commit.isFirstCommit match {
-      case Left(error) => Printer.displayln(error)
-      case Right(first) =>
-        if (first)
-          Printer.displayln("No commit to tag.")
-        else {
-          Commit.getLastCommit match {
-            case Left(error) => Printer.displayln(error)
-            case Right(shaCommit) =>
-              Repository.getPathToRefTags match {
-                case Left(error) => Printer.displayln(error)
-                case Right(tagsPath) =>
-                  IO.createFile(tagsPath, tagName, shaCommit)
-              }
-          }
-        }
-    }
-  }
-
-  def listTag(): Unit = {
-    getTags match {
-      case Left(error) => Printer.displayln(error)
-      case Right(value) =>
-        if (value.nonEmpty)
-          Printer.displayln(IO.listToString(value.map(x => x + "\n")))
-        else
-          Printer.displayln("No tag.")
-    }
+  def tag(tagsPath: String, tagName: String, shaCommit: String): String = {
+    IO.createFile(tagsPath, tagName, shaCommit)
+    s"Tag $tagName created.\n$tagName -> $shaCommit"
   }
 
   /**
-   * Function to get all the tags.
+   * Function to know a Tag already exists.
+   *
+   * @param repository Repository
+   * @param tagName    the Tag name
+   * @return true if the Tag already exists else false
    */
-  def getTags: Either[String, List[String]] = {
-    Repository.getPathToRefTags match {
-      case Left(error) => Left(error)
-      case Right(tagsPath) =>
-        val tags = SgitIO.listFiles(tagsPath)
-        Right(tags.map(x => new File(x).getName))
-    }
+  def tagExists(repository: Repository, tagName: String): Boolean = {
+    repository.tags.exists(x => x.tagName == tagName)
   }
-
 }

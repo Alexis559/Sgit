@@ -3,7 +3,6 @@ package utils.io
 import java.io.{File, FileWriter, PrintWriter}
 
 import core.repository.Repository
-import utils.parser.Printer
 
 import scala.io.Source
 
@@ -122,33 +121,29 @@ object IO {
   /**
    * Function to clean the path of a file.
    *
-   * @param path path to the file
+   * @param repository Repository
+   * @param path       path to the file
    * @return Either left: error message, Either right: the path in String format to the file
    */
-  def cleanPathFile(path: String): Either[String, String] = {
+  def cleanPathFile(repository: Repository, path: String): Either[String, String] = {
     val file = new File(path)
     if(file.exists()) {
       var path = file.getPath
-      Repository.getRepositoryPath() match {
-        case Left(error) => Left(error)
-        case Right(result) =>
-          val pathRepo = new File(result).getParent + File.separator
-          path = path.replace(pathRepo, "")
-          val pattern = "." + File.separator
-          if (path.startsWith(pattern))
-            path = path.replace("." + File.separator, "")
-          if (path.startsWith("."))
-            path = path.replaceFirst(".", "")
-
-          Right(path)
-      }
+      val pathRepo = Repository.getRepoPath(repository) + File.separator
+      path = path.replace(pathRepo, "")
+      val pattern = "." + File.separator
+      if (path.startsWith(pattern))
+        path = path.replace("." + File.separator, "")
+      if (!file.getName.startsWith(".") && path.startsWith("."))
+        path = path.replaceFirst(".", "")
+      Right(path)
     } else {
       Left("File " + path + "doesn't exist !\n")
     }
   }
 
   /**
-   * Function to concatenate a List of String
+   * Function to concatenate a List of String.
    *
    * @param list the List of String
    * @return the String
@@ -158,9 +153,9 @@ object IO {
   }
 
   /**
-   * WTF SERIOUSLY!?
+   * Function to get the File separator to split depending of the OS.
    *
-   * @return
+   * @return the good File separator for the split usage
    */
   def getRegexFileSeparator: String = {
     if (File.separator == "\\")
@@ -169,12 +164,22 @@ object IO {
       "/"
   }
 
+  /**
+   * Function to delete a file.
+   *
+   * @param pathFile path to the file to delete
+   */
   def deleteFile(pathFile: String): Unit = {
     val file = new File(pathFile)
     if (file.isFile && file.exists())
       file.delete()
   }
 
+  /**
+   * Function to delete Recursively a folder.
+   *
+   * @param file the folder in a File format
+   */
   def deleteRecursively(file: File): Unit = {
     if (file.isDirectory) {
       file.listFiles.foreach(deleteRecursively)

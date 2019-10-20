@@ -1,32 +1,20 @@
 package core.objects
 
-import core.objects.Commit.{getCommit, getLastCommit}
-import utils.io.IO
-import utils.parser.Printer
+import core.repository.Repository
+import core.objects.Commit
 
 object Log {
 
   /**
-   * Logs
+   * Function to get the Log of the Repository.
+   *
+   * @param repository Repository
+   * @param commits    List of Commit
+   * @return Log in String format
    */
-  def log(): Unit = {
-    getLastCommit match {
-      case Left(error) => Printer.displayln(error)
-      case Right(sha) =>
-        commitParentRec(sha)
-
-        @scala.annotation.tailrec
-        def commitParentRec(sha: String): Unit = {
-          getCommit(sha) match {
-            case Left(error) => Printer.displayln(error)
-            case Right(value) =>
-              val commit = value.map(x => x.split("\n")).dropWhile(!_ (0).contains("message")).flatten
-              val parent = value.map(x => x.split(" ")).filter(_ (0) == "parent").flatten
-              Printer.displayln(s"commit ${sha} (HEAD -> ${Branch.getCurrentBranch.getOrElse("")}, tag: ${IO.listToString(Tag.getTags.getOrElse(List()))}) \n\n ${IO.listToString(commit).replace("message", "")} \n\n")
-              if (parent.tail.head != "nil")
-                commitParentRec(parent.tail.head)
-          }
-        }
-    }
+  def log(repository: Repository, commits: List[Commit]): String = {
+    var log = ""
+    commits.reverse.map(x => log += s"\ncommit ${x.sha} (HEAD -> ${repository.currentBranch.branchName})\n\n\t${x.commitMessage}\n").toString()
+    log
   }
 }

@@ -1,8 +1,10 @@
 package coreTest.objects
 
 import java.io.File
+import java.nio.file.Files
 
-import core.repository.Repository
+import core.commands.{AddCmd, CommitCmd, InitCmd}
+import core.repository.{ImpureRepository, Repository}
 import org.scalatest.{BeforeAndAfterEach, FlatSpec}
 import utils.io.IO
 
@@ -10,34 +12,34 @@ class CommitTest extends FlatSpec with BeforeAndAfterEach {
 
   val currentPath: String = System.getProperty("user.dir")
   val filename = "filetest.txt"
-  val repoDir: String = Repository.getSgitName
+  val filename2 = "filetest2.txt"
   val textcontent = "testcontent"
+  var repoDir: String = ""
+  var repository: Repository = _
 
   override def beforeEach(): Unit = {
-    Repository.createRepository(currentPath)
+    repoDir = Files.createTempDirectory("RepoTestSgit").toString
+    InitCmd.init(repoDir)
+    repository = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
   }
 
   override def afterEach(): Unit = {
-    IO.deleteRecursively(new File(IO.buildPath(List(currentPath, ".sgit"))))
+    IO.deleteRecursively(new File(repoDir))
   }
 
-  /*it should "update the sha1 in the current Branch file" in {
-    IO.createFile(IO.buildPath(List(currentPath, repoDir)), filename, textcontent)
-    Blob.treatBlob(List(IO.buildPath(List(currentPath, repoDir, filename))))
-    Commit.commit("test")
-    Commit.updateCommitBranch(SgitIO.sha("testSha1"))
-    Branch.getCurrentBranch match {
-      case Left(_) => assert(false)
-      case Right(result1) =>
-        Repository.getPathToRefHeads match {
-          case Left(_) => assert(false)
-          case Right(result2) =>
-            IO.readContentFile(IO.buildPath(List(result2, result1))) match {
-              case Left(_) => assert(false)
-              case Right(result) =>
-                assert(IO.listToString(result).contains(SgitIO.sha("testSha1")))
-            }
-        }
-    }
-  }*/
+  it should "return nothing to commit" in {
+    val message = CommitCmd.commit(repository, "test")
+    assert(message == "Nothing to commit.")
+  }
+
+  it should "update the commit in the branch file" in {
+    IO.createFile(repoDir, filename, textcontent)
+    AddCmd.add(repository, List(IO.buildPath(List(repoDir, filename))))
+
+    val newRepository = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
+
+    CommitCmd.commit(newRepository, "test")
+    val newRepository2 = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
+    assert(newRepository2.currentBranch.commit != "nil")
+  }
 }
