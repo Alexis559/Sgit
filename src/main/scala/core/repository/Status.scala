@@ -16,7 +16,7 @@ object Status {
    * @return the Status of the Repository
    */
   def status(repository: Repository, untrackedFiles: List[String], changesNotStaged: List[Map[String, String]], index: List[BlobIndex], commitMap: Map[String, Any]): String = {
-    val commitList = Commit.commitToList(commitMap)
+    val commitList = Commit.commitToList(repository, commitMap)
     val changesNotCommitted = Status.changesNotCommitted(repository, index, commitList)
     val newFilesFirsCommit = Status.listNewFilesFirstCommit(index)
 
@@ -58,22 +58,21 @@ object Status {
    * @return the List of differences in a Map format
    */
   def changesNotCommitted(repository: Repository, index: List[BlobIndex], lastCommitIndex: List[String]): List[Map[String, String]] = {
-    val commitFlat = lastCommitIndex.flatMap(x => x.split(" "))
+    val commitFlat = lastCommitIndex.map(x => x.splitAt(x.lastIndexOf(" ")))
+    val commitFiles = commitFlat.map(x => x._1)
     val indexKeys = index.map(_.fileName)
     val indexValues = index.map(_.sha)
 
-    val filesDeleted: List[Map[String, String]] = lastCommitIndex
-      .map(_.split(" ")(0))
-      .filterNot(indexKeys.contains(_))
+    val filesDeleted: List[Map[String, String]] = commitFiles
+      .filterNot(x => indexKeys.contains(x))
       .map(x => Map(x -> "deleted"))
 
-    val filesModified: List[Map[String, String]] = lastCommitIndex
-      .map(_.split(" "))
-      .filter(x => indexKeys.contains(x(0)) && !indexValues.contains(x(1)))
-      .map(y => Map(y(0) -> "modified"))
+    val filesModified: List[Map[String, String]] = commitFlat
+      .filter(x => indexKeys.contains(x._1) && !indexValues.contains(x._2.replace(" ", "")))
+      .map(y => Map(y._1 -> "modified"))
 
     val filesAdded: List[Map[String, String]] = indexKeys
-      .filterNot(x => commitFlat.contains(x))
+      .filterNot(x => commitFiles.contains(x))
       .map(y => Map(y -> "added"))
 
     filesDeleted ::: filesModified ::: filesAdded

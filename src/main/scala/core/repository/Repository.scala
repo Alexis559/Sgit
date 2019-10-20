@@ -37,13 +37,14 @@ case class Repository(pathRepo: String, currentBranch: Branch) {
             case Right(value) =>
               val commit = value.map(x => x.split("\n")).dropWhile(!_ (0).contains("message")).flatten
               val parent = value.map(x => x.split(" ")).filter(_ (0) == "parent").flatten
-              Right(Commit(sha.head, IO.listToString(commit), IO.listToString(parent), value))
+              Right(Commit(sha.head, IO.listToString(commit).replace("message", ""), IO.listToString(parent).replace("parent", ""), value))
           }
         } else {
           Right(null)
         }
     }
   }
+
   // Some paths
   val indexPath: String = IO.buildPath(List(pathRepo, "index"))
   val branchPath: String = IO.buildPath(List(pathRepo, "refs", "head"))
@@ -58,7 +59,7 @@ object Repository {
   }
 
   def getRepoName(repository: Repository): String = {
-    repository.pathRepo.split(IO.getRegexFileSeparator).last
+    Repository.getRepoPath(repository).split(IO.getRegexFileSeparator).last
   }
 
   def getCurrentBranch(repository: Repository): Branch = {

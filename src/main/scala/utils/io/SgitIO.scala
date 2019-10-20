@@ -81,6 +81,12 @@ object SgitIO {
     keySet.map(key => key -> mergeMap(nodeForKey(map1, key), nodeForKey(map2, key))).toMap
   }
 
+  /**
+   * Function to list all the files in a directory.
+   *
+   * @param pathFile the path of the Directory
+   * @return List of String
+   */
   def listFiles(pathFile: String = System.getProperty("user.dir")): List[String] = {
     val files = listFilesRec(new File(pathFile)).toList
     files.map(_.getPath)

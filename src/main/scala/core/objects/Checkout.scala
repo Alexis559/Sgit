@@ -78,15 +78,18 @@ object Checkout {
    * @param commitMap  Commit Index in a Map format
    */
   def recreateWorkingDirectory(repository: Repository, branchName: String, commitMap: Map[String, Any]): Unit = {
-    val commit = Commit.commitToList(commitMap)
-    commit.map(_.split(" "))
+    val commit = Commit.commitToList(repository, commitMap)
+    commit.map(x => x.splitAt(x.lastIndexOf(" ")))
       .foreach(x => {
         val pathRepo = Repository.getRepoPath(repository)
-        if (x(0).contains(File.separator)) {
-          IO.createDirectory(pathRepo, x(0).substring(0, x(0).lastIndexOf(File.separator)))
+        if (x._1.contains(File.separator)) {
+          val filePath = x._1.substring(0, x._1.lastIndexOf(File.separator))
+          IO.createDirectory(pathRepo, filePath)
+          IO.createFile(IO.buildPath(List(pathRepo, filePath)), x._1.split(IO.getRegexFileSeparator).last, IO.listToString(IO.readContentFile(Object.getObjectFilePath(repository, x._2.replace(" ", ""))).getOrElse(List())))
+        } else {
+          IO.createFile(pathRepo, x._1.split(IO.getRegexFileSeparator).last, IO.listToString(IO.readContentFile(Object.getObjectFilePath(repository, x._2.replace(" ", ""))).getOrElse(List())))
         }
-        IO.createFile(pathRepo, x(0).split(IO.getRegexFileSeparator).last, IO.listToString(IO.readContentFile(Object.getObjectFilePath(repository, x(1))).getOrElse(List())))
-        IO.writeInFile(Repository.pathToIndex(repository), x(1) + " " + x(0), true)
+        IO.writeInFile(Repository.pathToIndex(repository), x._2.replace(" ", "") + " " + x._1 + "\n", true)
       })
   }
 }

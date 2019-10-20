@@ -32,7 +32,7 @@ object CheckoutCmd {
                 Commit.commitToMap(repository, value.sha) match {
                   case Left(error) => error
                   case Right(commitMap) =>
-                    val indexLastCommit = Commit.commitToList(commitMap)
+                    val indexLastCommit = Commit.commitToList(repository, commitMap)
                     val changesNotCommitted = Status.changesNotCommitted(repository, index, indexLastCommit)
                     val shaCommitBranch = Branch.getBranchCommit(repository, branchName).commit
                     Commit.commitToMap(repository, shaCommitBranch) match {

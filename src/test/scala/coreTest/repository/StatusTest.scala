@@ -25,7 +25,7 @@ class StatusTest extends FlatSpec with BeforeAndAfterEach {
   }
 
   override def afterEach(): Unit = {
-    //IO.deleteRecursively(new File(repoDir))
+    IO.deleteRecursively(new File(repoDir))
   }
 
   it should "list new files before first commit" in {
@@ -110,7 +110,7 @@ class StatusTest extends FlatSpec with BeforeAndAfterEach {
     val newRepo3 = ImpureRepository.chargeRepo(repoDir).getOrElse(null)
     val index = newRepo3.index.getOrElse(List())
     val commitMap = Commit.commitToMap(newRepo3, newRepo3.currentBranch.commit).getOrElse(Map())
-    val commitList = Commit.commitToList(commitMap)
+    val commitList = Commit.commitToList(repository, commitMap)
     val list = Status.changesNotCommitted(newRepo3, index, commitList)
 
     assert(list.head.head._2 == "deleted" && list.head.head._1 == filename2)

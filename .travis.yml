@@ -17,5 +17,4 @@ jobs:
       script: sbt test
     - stage: sonarcloud
       script:
-        - sbt coverage test coverageReport
         - sonar-scanner

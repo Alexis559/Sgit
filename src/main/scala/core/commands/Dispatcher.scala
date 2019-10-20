@@ -19,7 +19,7 @@ object Dispatcher {
           case "diff" => DiffCmd.diff(repository)
           case "branch" => if (config.verboseBranch) BranchCmd.branchList(repository, true) else BranchCmd.branch(repository, config.branchName)
           case "checkout" => CheckoutCmd.checkout(repository, config.branchName)
-          //case "test" => Printer.displayln(Checkout.recreateWorkingDirectory("test").toString)
+          case "log" => LogCmd.log(repository)
         }
     }
   }
